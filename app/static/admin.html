@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Produtos • Administração</title><link rel="stylesheet" href="/static/style.css"><script src="/static/admin.js" defer></script></head>
+<body><header><div><p class="eyebrow">GESTÃO • ESPORTES</p><h1>Catálogo de produtos</h1></div><button id="logout" class="secondary">Sair da conta</button></header><main>
+<p id="message" role="status" aria-live="polite"></p>
+<div class="layout"><section class="card"><h2 id="form-title">Novo produto</h2><form id="product-form">
+<label for="nome">Nome *</label><input id="nome" maxlength="160" required>
+<label for="descricao">Descrição</label><textarea id="descricao" rows="3" maxlength="5000"></textarea>
+<div class="pair"><div><label for="preco">Preço (R$) *</label><input id="preco" type="text" inputmode="numeric" placeholder="0,00" required></div><div><label for="estoque">Estoque *</label><input id="estoque" type="number" min="0" max="2147483647" step="1" required></div></div>
+<label for="categoria">Categoria</label><input id="categoria" maxlength="100" list="categories"><datalist id="categories"><option value="Roupas"><option value="Calçados"><option value="Equipamentos"><option value="Acessórios"></datalist>
+<label for="imagemUrl">URL da imagem</label><input id="imagemUrl" type="url" placeholder="https://…">
+<div class="actions"><button type="submit">Salvar produto</button><button type="button" id="cancel" class="secondary">Limpar</button></div></form></section>
+<section class="card catalog"><h2>Produtos cadastrados</h2><form id="search-form" class="filters"><input id="busca" aria-label="Buscar por nome" placeholder="Buscar por nome"><input id="filter-category" aria-label="Filtrar categoria" placeholder="Categoria exata"><button>Buscar</button></form>
+<p id="count"></p><div class="table-wrap"><table><thead><tr><th>Produto</th><th>Preço</th><th>Estoque</th><th>Ações</th></tr></thead><tbody id="products"></tbody></table></div><div class="actions"><button id="previous" class="secondary">Anterior</button><span id="page"></span><button id="next" class="secondary">Próxima</button></div></section></div></main></body></html>
