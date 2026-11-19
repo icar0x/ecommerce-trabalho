@@ -231,6 +231,25 @@ def test_service_unavailable(setup, monkeypatch):
     assert client.get('/api/recentes').status_code == 503
 
 
+def test_diagnostics_require_admin_and_hide_connection_details(setup, monkeypatch):
+    client, collection, cache, _ = setup
+    assert client.get('/api/admin/diagnostico').status_code == 401
+    assert client.get('/api/admin/diagnostico', headers={'Authorization': 'Bearer other'}).status_code == 403
+    response = client.get('/api/admin/diagnostico', headers=HEADERS)
+    assert response.status_code == 200
+    assert response.json()['dados'] == {'mongodb': {'status': 'ok'}, 'redis': {'status': 'ok'}}
+
+    def fail(*args, **kwargs):
+        raise ConnectionFailure('private host with private-password')
+
+    monkeypatch.setattr(collection, 'find_one', fail)
+    response = client.get('/api/admin/diagnostico', headers=HEADERS)
+    assert response.json()['dados']['mongodb']['status'] == 'erro'
+    assert response.json()['dados']['redis']['status'] == 'ok'
+    assert 'private' not in response.text
+    assert 'no-store' == response.headers['cache-control']
+
+
 def test_supabase_network_and_missing_configuration():
     def fail(request):
         raise httpx.ConnectError('private details', request=request)

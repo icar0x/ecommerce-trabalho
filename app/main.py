@@ -19,6 +19,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.auth import SupabaseAuth
 from app.config import Settings
+from app.diagnostics import connection_failure
 from app.models import CATEGORIES, CartQuery, Login, Product, ProductInput, RecentInput
 from app.search import search_query
 
@@ -140,6 +141,21 @@ def create_app(settings=None, products=None, redis=None, auth=None):
     @app.get('/api/auth/me')
     def me(user=Depends(admin)):
         return {'dados': {'id': user['id'], 'email': user.get('email')}}
+
+    @app.get('/api/admin/diagnostico')
+    def service_diagnostics(request: Request, user=Depends(admin)):
+        results = {}
+        try:
+            request.app.state.products.find_one({}, {'_id': 1})
+            results['mongodb'] = {'status': 'ok'}
+        except PyMongoError as error:
+            results['mongodb'] = connection_failure('MongoDB', error, settings.mongodb_uri)
+        try:
+            request.app.state.redis.ping()
+            results['redis'] = {'status': 'ok'}
+        except RedisError as error:
+            results['redis'] = connection_failure('Redis', error, settings.redis_url)
+        return {'dados': results}
 
     @app.post('/api/auth/logout', status_code=204)
     def logout(request: Request, user=Depends(admin), credentials=Depends(bearer)):

@@ -71,6 +71,7 @@ Todas as rotas usam o prefixo `/api`. Sucesso retorna `{"dados": ...}`; listagem
 | --- | --- |
 | `POST /api/auth/login` | Corpo `{"email":"admin@example.com","password":"sua-senha"}`; retorna access_token, token_type e expires_in em dados |
 | `GET /api/auth/me` | Identidade do administrador autenticado |
+| `GET /api/admin/diagnostico` | Administrador: verifica MongoDB/Redis e retorna somente status e orientações de conexão, sem credenciais |
 | `POST /api/auth/logout` | Encerra sessão autenticada |
 | `GET /api/produtos` | Lista pública; parâmetros `busca`, `categoria`, `pagina` (1+) e `limite` (1–100, padrão 100) |
 | `GET /api/produtos/{id}` | Produto público |
