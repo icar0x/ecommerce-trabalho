@@ -46,7 +46,7 @@ def check():
                 expect(page.locator('#product-grid .product-card')).to_have_count(2)
                 expect(page.locator('#visual-categories .category-card')).to_have_count(3)
                 expect(page.locator('#category-tabs .chip')).to_have_count(4)
-                assert page.locator('#visual-categories .category-card').all_text_contents() == ['Roupas', 'Tênis', 'Acessórios']
+                assert page.locator('#visual-categories .category-card').evaluate_all('(cards) => cards.map(card => card.dataset.category)') == ['Roupas', 'Tênis', 'Acessórios']
                 expect(page.get_by_role('button', name=f'Adicionar {sold_name} ao carrinho')).to_be_disabled()
                 visitors.update(cookie['value'] for cookie in context.cookies() if cookie['name'] == 'visitante')
                 page.evaluate("window.scrollTo({top: 0, behavior: 'instant'})")

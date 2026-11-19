@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl, field_vali
 
 ProductCategory = Literal['Roupas', 'Tênis', 'Acessórios']
 CATEGORIES = get_args(ProductCategory)
+LocalImage = Annotated[str, Field(pattern=r'^/static/assets/(?:[A-Za-z0-9_-]|%20|%[89A-Fa-f][0-9A-Fa-f])+\.(?:png|jpg|jpeg|webp)$')]
 
 
 class ProductInput(BaseModel):
@@ -14,7 +15,7 @@ class ProductInput(BaseModel):
     descricao: str = Field(default='', max_length=5000)
     preco: Decimal = Field(gt=0, max_digits=12, decimal_places=2, allow_inf_nan=False)
     categoria: ProductCategory
-    imagemUrl: HttpUrl | None = None
+    imagemUrl: HttpUrl | LocalImage | None = None
     estoque: Annotated[int, Field(strict=True, ge=0, le=2147483647)]
 
     @field_validator('imagemUrl', mode='before')

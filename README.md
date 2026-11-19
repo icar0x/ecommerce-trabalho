@@ -116,7 +116,7 @@ Exemplo de resposta individual:
 
 **Dinheiro:** `preco` usa `Decimal` em Python e BSON `Decimal128` no MongoDB; na resposta JSON é **string com duas casas decimais**. Prefira enviar string com ponto decimal. Também são aceitos números JSON que respeitem a validação, mas não devem ser usados para cálculos monetários no cliente. Máximo 12 dígitos totais e duas casas; mais de duas casas são rejeitadas, sem arredondamento silencioso. O frontend da loja converte preços em centavos inteiros para somar e multiplicar, e só depois formata o resultado em reais.
 
-Nome e categoria são obrigatórios; categoria aceita apenas `Roupas`, `Tênis` ou `Acessórios`. Descrição pode ser vazia; preço é positivo; estoque é inteiro não negativo (booleanos e frações são rejeitados). Imagem aceita apenas URL HTTP/HTTPS, `null`, campo omitido ou texto vazio. Sem upload. PUT exige nome, categoria, preço e estoque; campos opcionais omitidos voltam aos padrões. Os timestamps são UTC e ObjectId aparece como `id` string. Campos extras de entrada são rejeitados.
+Nome e categoria são obrigatórios; categoria aceita apenas `Roupas`, `Tênis` ou `Acessórios`. Descrição pode ser vazia; preço é positivo; estoque é inteiro não negativo (booleanos e frações são rejeitados). Imagem aceita URL HTTP/HTTPS, caminho local `/static/assets/arquivo.png` (PNG, JPG, JPEG ou WebP, com espaços e acentos codificados na URL), `null`, campo omitido ou texto vazio. Caminhos locais não aceitam subpastas ou travessia de diretórios. Sem upload. PUT exige nome, categoria, preço e estoque; campos opcionais omitidos voltam aos padrões. Os timestamps são UTC e ObjectId aparece como `id` string. Campos extras de entrada são rejeitados.
 
 ### Cookie e histórico
 
@@ -149,7 +149,7 @@ O Redis armazena somente IDs em `recentes:<uuid>`. A transação LREM/LPUSH/LTRI
 - `shop-core.mjs`: normalização do carrinho, centavos e cálculo dos totais; testável com Node.
 - `shop.css`: estilos exclusivos da loja, sem alterar o painel administrativo.
 
-O layout da loja segue a referência enviada: preto e branco, acento discreto dourado, banner fotográfico, categorias em cartões e rodapé em colunas. A logo e a paleta definitiva estão adiadas; a versão atual usa o nome textual provisório. O sistema visual está descrito em `DESIGN.md`; origem das fotografias e prompt do banner em `app/static/assets/README.md`. As imagens de categorias são locais e ilustrativas; não criam produtos ou descontos. Os prompts experimentais de camisas não fazem parte do projeto salvo.
+O layout da loja segue a referência enviada: preto e branco, acento verde-limão, banner fotográfico, categorias em cartões e rodapé em colunas. A logo atual fornecida pelo usuário está em `app/static/assets/impulso-logo.png`. O sistema visual está descrito em `DESIGN.md`; origem das fotografias e prompt do banner em `app/static/assets/README.md`. As imagens de categorias são locais e ilustrativas; os produtos cadastrados usam suas próprias imagens locais.
 
 Favoritos: o coração dos cartões salva até 50 produtos no localStorage (`impulso_favorites_v1`). O ícone no cabeçalho abre a lista de favoritos, com busca, filtros e dados atuais dos produtos. Funciona sem conta e permanece restrito ao navegador utilizado.
 
@@ -162,6 +162,16 @@ Imagens usam a URL cadastrada no painel, com ilustração local de apoio caso n�
 **WhatsApp adiado:** não há número configurado, botão de envio funcional, pagamento ou criação de pedido. O resumo informa que essa opção estará disponível em breve. O nome `Impulso` é provisório; configure `LOJA_NOME` no `.env` e reinicie para trocar.
 
 ## Dados de demonstração
+
+Coleção Impulso aprovada: **17 produtos**, com 3 camisas, 9 tênis (3 modelos em 3 cores) e 5 acessórios. Preços e estoques fictícios autorizados para o trabalho acadêmico. Cada cor de tênis é um produto separado; não há seleção de tamanho ou estoque por numeração.
+
+```powershell
+python -m scripts.catalog
+```
+
+O catálogo está em `scripts/catalog.json`. O comando valida os arquivos locais antes de inserir e usa `catalogKey` com índice único esparso para não duplicar nem sobrescrever produtos e edições do painel. Não exclui registros anteriores. Camisas: R$ 79,90–99,90; tênis: R$ 249,90–299,90; acessórios: R$ 29,90–159,90. Estoques iniciais fictícios entre 12 e 50 unidades.
+
+O seed antigo abaixo é opcional e insere quatro exemplos genéricos adicionais; não é necessário para a coleção Impulso:
 
 ```powershell
 python -m scripts.seed

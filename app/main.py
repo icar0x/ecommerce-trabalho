@@ -206,6 +206,10 @@ def create_app(settings=None, products=None, redis=None, auth=None):
     def index():
         return FileResponse(STATIC / 'index.html')
 
+    @app.get('/loja', include_in_schema=False)
+    def catalog_page():
+        return FileResponse(STATIC / 'collection.html')
+
     @app.get('/admin/login', include_in_schema=False)
     def login_page():
         return FileResponse(STATIC / 'login.html')

@@ -13,6 +13,7 @@ from app.auth import SupabaseAuth
 from app.config import Settings
 from app.main import TTL, create_app
 from scripts.seed import seed
+from scripts.catalog import seed_catalog
 
 ADMIN = str(uuid4())
 OTHER = str(uuid4())
@@ -53,6 +54,32 @@ def create(client, **overrides):
     response = client.post('/api/produtos', json={**PRODUCT, **overrides}, headers=HEADERS)
     assert response.status_code == 201, response.text
     return response.json()['dados']
+
+
+def test_local_catalog_images_and_preserved_edits(setup):
+    client, collection, _, _ = setup
+    assert seed_catalog(collection) == 17
+    response = client.get('/api/produtos')
+    assert response.status_code == 200
+    products = response.json()['dados']
+    assert len(products) == 17
+    assert {category: sum(p['categoria'] == category for p in products) for category in ['Roupas', 'Tênis', 'Acessórios']} == {'Roupas': 3, 'Tênis': 9, 'Acessórios': 5}
+    for product in products:
+        assert client.get(product['imagemUrl']).status_code == 200
+    product = products[0]
+    edited = {key: product[key] for key in PRODUCT}
+    edited.update(nome='Nome editado no painel', estoque=2, imagemUrl=product['imagemUrl'])
+    assert client.put(f"/api/produtos/{product['id']}", json=edited, headers=HEADERS).status_code == 200
+    assert seed_catalog(collection) == 0
+    current = client.get(f"/api/produtos/{product['id']}").json()['dados']
+    assert current['nome'] == 'Nome editado no painel'
+    assert current['estoque'] == 2
+
+
+@pytest.mark.parametrize('image', ['/static/assets/../secret.png', '//example.com/image.png', '/static/assets/%2e%2e%2fsecret.png', '/static/assets/%2Fsecret.png'])
+def test_reject_invalid_local_image_paths(setup, image):
+    client, _, _, _ = setup
+    assert client.post('/api/produtos', json={**PRODUCT, 'imagemUrl': image}, headers=HEADERS).status_code == 422
 
 
 def test_auth(setup):

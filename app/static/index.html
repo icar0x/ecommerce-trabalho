@@ -4,24 +4,48 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="Roupas, tênis e acessórios para o seu próximo movimento. Encontre o que acompanha o seu estilo.">
   <title>Impulso • Seu próximo movimento</title>
-  <link rel="stylesheet" href="/static/shop.css"><script type="module" src="/static/catalog.js"></script>
+  <link rel="stylesheet" href="/static/shop.css?v=20261119-category2"><script type="module" src="/static/catalog.js?v=20261119-header3"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Pular para o conteúdo</a>
   <header id="shop-header"></header>
   <main id="main">
-    <section class="hero wrap" aria-labelledby="hero-title">
-      <div class="hero-copy"><p class="eyebrow">SEU ESTILO. SEU MOVIMENTO.</p><h1 id="hero-title">Supere seus<br>próprios limites.</h1><p>Encontre o que te move.<br>Dentro e fora do treino.</p><div class="hero-actions"><a class="btn btn-dark" href="#catalogo">Explorar produtos</a><a class="btn btn-outline" href="#categorias">Ver categorias</a></div></div>
-      <div class="hero-caption" aria-hidden="true"><span>Feito para acompanhar você</span><strong>Em cada movimento.</strong><div class="hero-caption-line"></div></div>
+    <section class="hero hero-carousel wrap" aria-labelledby="hero-title" aria-roledescription="carrossel">
+      <h1 id="hero-title" class="sr-only">Impulso: seu próximo movimento</h1>
+      <div class="hero-slide" id="hero-shoes" role="group" aria-roledescription="slide" aria-label="1 de 3: Tênis District Lime">
+        <div class="hero-art"><img src="/static/assets/hero-impulso-shoes.png" alt="Tênis District Lime branco e cinza em uma plataforma de pedra, com partículas de impacto e detalhes verde-limão." width="2172" height="724" fetchpriority="high"></div>
+        <div class="hero-copy"><p class="eyebrow">DISTRICT LIME • SPORT + STREET</p><h2>Seu próximo<br>passo tem atitude.</h2><p>Branco, cinza e um toque de Impulso.<br>Encontre o seu novo favorito.</p><div class="hero-actions"><a class="btn btn-dark" href="/loja?categoria=T%C3%AAnis#catalogo">Explorar tênis</a><a class="btn btn-outline" href="#categorias">Ver categorias</a></div></div>
+      </div>
+      <div class="hero-slide" id="hero-hydrate" role="group" aria-roledescription="slide" aria-label="2 de 3: Squeeze Hydrate" hidden>
+        <div class="hero-art"><img src="/static/assets/hero-impulso-hydrate.png" alt="Garrafa preta Impulso Hydrate com gotas de água, cercada por um splash e reflexos verde-limão." width="2172" height="724" decoding="async" fetchpriority="low"></div>
+        <div class="hero-copy"><p class="eyebrow">HYDRATE • NO SEU RITMO</p><h2>Uma pausa.<br>Um novo impulso.</h2><p>Os detalhes acompanham o movimento.<br>Leve a Impulso com você.</p><div class="hero-actions"><a class="btn btn-dark" href="/loja?categoria=Acess%C3%B3rios#catalogo">Explorar acessórios</a><a class="btn btn-outline" href="#categorias">Ver categorias</a></div></div>
+      </div>
+      <div class="hero-slide" id="hero-clothing" role="group" aria-roledescription="slide" aria-label="3 de 3: Coleção de roupas" hidden>
+        <div class="hero-art"><img src="/static/assets/hero-impulso-clothing.png" alt="As três camisas Impulso: Essential preta, Motion grafite e regata Pulse branca, suspensas em estúdio." width="2172" height="724" decoding="async" fetchpriority="low"></div>
+        <div class="hero-copy"><p class="eyebrow">ESSENTIAL • MOTION • PULSE</p><h2>Três estilos.<br>O seu movimento.</h2><p>Do treino às ruas.<br>Escolha como vestir sua atitude.</p><div class="hero-actions"><a class="btn btn-dark" href="/loja?categoria=Roupas#catalogo">Explorar roupas</a><a class="btn btn-outline" href="#categorias">Ver categorias</a></div></div>
+      </div>
+      <p class="hero-slide-status sr-only" aria-live="off">Destaque 1 de 3: Tênis District Lime</p>
     </section>
-    <section class="collections-strip wrap" aria-label="Explore nossas coleções"><span class="collections-label">ENCONTRE SEU ESTILO</span><a href="/?categoria=Roupas#catalogo" class="activity-word">EVERYDAY<span>ROUPAS PARA O SEU RITMO</span></a><a href="/?categoria=T%C3%AAnis#catalogo" class="activity-word running-word">SNEAKERS</a><a href="/?categoria=Acess%C3%B3rios#catalogo" class="activity-word">ESSENTIALS</a><a href="#catalogo" class="text-link">Ver tudo</a></section>
+    <section class="collections-strip wrap" aria-label="Explore nossas coleções"><span class="collections-label">ENCONTRE SEU ESTILO</span><a href="/loja?categoria=Roupas#catalogo" class="activity-word">EVERYDAY<span>ROUPAS PARA O SEU RITMO</span></a><a href="/loja?categoria=T%C3%AAnis#catalogo" class="activity-word running-word">SNEAKERS</a><a href="/loja?categoria=Acess%C3%B3rios#catalogo" class="activity-word">ESSENTIALS</a><a href="/?catalogo=1#catalogo" class="text-link">Ver tudo</a></section>
     <section id="categorias" class="wrap category-section" aria-labelledby="category-title"><div class="section-heading compact-heading"><h2 id="category-title">Explore por categoria</h2><a href="#catalogo" class="text-link">Ver todos os produtos</a></div><div id="visual-categories" class="visual-categories">
-      <a class="category-card" href="/?categoria=Roupas#catalogo" data-category="Roupas"><span class="category-photo"><img src="/static/assets/category-clothing.jpg" alt="" width="360" height="250" loading="lazy"></span><span>Roupas</span></a>
-      <a class="category-card" href="/?categoria=T%C3%AAnis#catalogo" data-category="Tênis"><span class="category-photo"><img src="/static/assets/category-shoes.jpg" alt="" width="360" height="250" loading="lazy"></span><span>Tênis</span></a>
-      <a class="category-card" href="/?categoria=Acess%C3%B3rios#catalogo" data-category="Acessórios"><span class="category-photo"><img src="/static/assets/category-accessories.jpg" alt="" width="360" height="250" loading="lazy"></span><span>Acessórios</span></a>
+      <a class="category-card category-highlight" href="/loja?categoria=Roupas#catalogo" data-category="Roupas" aria-label="Explorar Roupas">
+        <span class="category-kicker"><span data-icon="spark"></span>SPORT + STREET</span>
+        <span class="category-copy"><span class="category-name">Roupas</span><span class="category-description">Três estilos.<br>Uma só atitude.</span><span class="category-explore">Explorar coleção</span></span>
+        <span class="category-object category-object-clothing"><img src="/static/assets/category-cutout-clothing.png" alt="" width="1863" height="844" loading="lazy"></span>
+      </a>
+      <a class="category-card category-highlight" href="/loja?categoria=T%C3%AAnis#catalogo" data-category="Tênis" aria-label="Explorar Tênis">
+        <span class="category-kicker"><span data-icon="spark"></span>SEU PRÓXIMO PASSO</span>
+        <span class="category-copy"><span class="category-name">Tênis</span><span class="category-description">Presença nas ruas.<br>Impulso a cada passo.</span><span class="category-explore">Explorar coleção</span></span>
+        <span class="category-object category-object-shoes"><img src="/static/assets/category-cutout-shoes.png" alt="" width="1774" height="887" loading="lazy"></span>
+      </a>
+      <a class="category-card category-highlight" href="/loja?categoria=Acess%C3%B3rios#catalogo" data-category="Acessórios" aria-label="Explorar Acessórios">
+        <span class="category-kicker"><span data-icon="bag"></span>SEMPRE COM VOCÊ</span>
+        <span class="category-copy"><span class="category-name">Acessórios</span><span class="category-description">Os detalhes que<br>acompanham seu ritmo.</span><span class="category-explore">Explorar coleção</span></span>
+        <span class="category-object category-object-accessories"><img src="/static/assets/category-cutout-accessories.png" alt="" width="1536" height="1024" loading="lazy"></span>
+      </a>
     </div></section>
     <section id="catalogo" class="wrap catalog-section" aria-labelledby="catalog-title">
-      <div class="section-heading compact-heading"><h2 id="catalog-title">Escolhas para o seu próximo passo</h2><a href="#catalogo" id="view-all-products" class="text-link">Ver tudo</a></div>
+      <div class="section-heading compact-heading"><h2 id="catalog-title">Escolhas para o seu próximo passo</h2><a href="/?catalogo=1#catalogo" id="view-all-products" class="text-link">Ver tudo</a></div>
       <form id="catalog-filters" class="catalog-filters" role="search">
         <div id="category-tabs" class="category-tabs" aria-label="Categorias"><button type="button" class="chip active" data-category="" aria-pressed="true">Todos os produtos</button></div>
         <div class="search-field"><label class="sr-only" for="search">Buscar produtos pelo nome</label><i data-icon="search"></i><input id="search" name="busca" type="search" placeholder="O que você procura?" maxlength="160"><button type="submit" class="search-submit" aria-label="Buscar">Buscar</button></div>
@@ -31,8 +55,8 @@
       <div id="product-grid" class="product-grid" aria-label="Produtos" aria-busy="true"></div>
       <nav id="pagination" class="pagination" aria-label="Paginação" hidden><button id="previous-page" class="btn btn-outline" type="button">Anterior</button><span id="page-label"></span><button id="next-page" class="btn btn-outline" type="button">Próxima</button></nav>
     </section>
-    <section id="recent-section" class="recent-section" hidden><div class="wrap"><div class="section-heading"><div><p class="eyebrow">CONTINUE EXPLORANDO</p><h2>De olho nesses?</h2></div><p>Os produtos que você viu por aqui.</p></div><div id="recent-grid" class="product-grid recent-grid"></div></div></section>
-    <section class="editorial-banner wrap" aria-labelledby="editorial-title"><div><p class="eyebrow">MOVIMENTO É PARA TODOS</p><h2 id="editorial-title">Seu estilo.<br>Suas regras.</h2><p>Vista o que acompanha o seu ritmo.</p><a class="btn btn-white" href="/?categoria=Roupas#catalogo">Explorar roupas</a></div><span class="editorial-type" aria-hidden="true">GO<br><em>BEYOND.</em></span></section>
+    <section id="recent-section" class="recent-section" aria-labelledby="recent-title" hidden><div class="wrap"><div class="section-heading"><h2 id="recent-title">Vistos recentemente</h2><p>Seus últimos produtos visitados.</p></div><div id="recent-grid" class="product-grid recent-grid"></div></div></section>
+    <section class="editorial-banner wrap" aria-labelledby="editorial-title"><div><p class="eyebrow">MOVIMENTO É PARA TODOS</p><h2 id="editorial-title">Seu estilo.<br>Suas regras.</h2><p>Vista o que acompanha o seu ritmo.</p><a class="btn btn-white" href="/loja?categoria=Roupas#catalogo">Explorar roupas</a></div><span class="editorial-type" aria-hidden="true">GO<br><em>BEYOND.</em></span></section>
     <section class="service-strip wrap" aria-label="Como funciona"><article><span data-icon="search"></span><div><h3>Encontre seu favorito</h3><p>Produtos para cada movimento.</p></div></article><article><span data-icon="bag"></span><div><h3>Seu carrinho, salvo</h3><p>Continue de onde parou.</p></div></article><article><span data-icon="history"></span><div><h3>Vistos recentemente</h3><p>Reencontre o que chamou atenção.</p></div></article><article><span data-icon="check"></span><div><h3>Escolha no seu ritmo</h3><p>Consulte detalhes e disponibilidade.</p></div></article></section>
   </main>
   <footer id="shop-footer"></footer><div id="toast" class="toast" role="status" aria-live="polite" hidden></div>

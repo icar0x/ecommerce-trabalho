@@ -1,10 +1,48 @@
-import {api, ready, getCart, addToCart, toast, money, toCents, setProductImage, loadRecent, showState} from './shop.js';
+import {api, ready, getCart, addToCart, toast, money, toCents, setProductImage, loadRecent, showState, element} from './shop.js?v=20261119-header3';
+import {variantInfo} from './product-variants.mjs';
 
 const id = location.pathname.split('/').filter(Boolean).at(-1);
 const quantity = document.querySelector('#quantity');
 const add = document.querySelector('#add-product');
 let product;
 let max = 0;
+
+async function loadVariants() {
+  const info = variantInfo(product);
+  if (!info) return;
+  const section = element('div', 'detail-variants');
+  const caption = element('p', 'variant-caption', `Cor: ${info.color}`);
+  const choices = element('div', 'product-swatches');
+  choices.setAttribute('role', 'group');
+  choices.setAttribute('aria-label', `Cores do Tênis Impulso ${info.family}`);
+  try {
+    const query = new URLSearchParams({categoria: 'Tênis', busca: `Tênis Impulso ${info.family}`, limite: 100, pagina: 1});
+    const response = await api(`/api/produtos?${query}`);
+    const products = response.dados;
+    for (let next = 2; products.length < response.total; next++) {
+      query.set('pagina', next);
+      const more = await api(`/api/produtos?${query}`);
+      if (!more.dados.length) break;
+      products.push(...more.dados);
+    }
+    const variants = products.filter(candidate => variantInfo(candidate)?.family === info.family);
+    if (variants.length < 2) return;
+    for (const variant of variants) {
+      const color = variantInfo(variant);
+      const link = element('a', `product-swatch swatch-${color.family.toLowerCase()}-${color.color.toLowerCase()}`);
+      link.href = `/produtos/${variant.id}`;
+      link.title = `${color.color}${variant.estoque < 1 ? ' — esgotado' : ''}`;
+      link.setAttribute('aria-label', `Selecionar ${color.color}${variant.estoque < 1 ? ', esgotado' : ''}`);
+      if (variant.id === product.id) link.setAttribute('aria-current', 'page');
+      choices.append(link);
+    }
+    section.append(caption, choices);
+    document.querySelector('.detail-variants')?.remove();
+    document.querySelector('#add-form').before(section);
+  } catch {
+    // A indisponibilidade de outras cores não impede comprar o produto aberto.
+  }
+}
 
 function updateQuantityControls() {
   if (!product) return;
@@ -46,6 +84,7 @@ async function load() {
     setProductImage(document.querySelector('#product-image'), product, () => { document.querySelector('#image-note').hidden = false; });
     updateQuantityControls();
     status.hidden = true; document.querySelector('#product-detail').hidden = false;
+    await loadVariants();
     // A consulta do produto não registra visualização: o POST é explícito.
     try {
       await api('/api/recentes', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({produtoId: id})});
