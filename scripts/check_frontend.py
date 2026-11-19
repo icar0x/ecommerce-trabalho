@@ -9,10 +9,10 @@ from uuid import uuid4
 
 from bson import Decimal128
 from playwright.sync_api import expect, sync_playwright
-from pymongo import MongoClient
 from redis import Redis
 
 from app.config import Settings
+from app.database import create_mongo_client
 from app.main import document, utc_now
 from app.models import ProductInput
 
@@ -27,7 +27,7 @@ def check():
     ids = []
     visitors = set()
     errors = []
-    with MongoClient(settings.mongodb_uri, serverSelectionTimeoutMS=7000) as mongo, Redis.from_url(settings.redis_url, socket_timeout=5) as cache:
+    with create_mongo_client(settings.mongodb_uri, serverSelectionTimeoutMS=7000) as mongo, Redis.from_url(settings.redis_url, socket_timeout=5) as cache:
         collection = mongo[settings.mongodb_database].produtos
         try:
             for product_name, stock in [(name, 3), (sold_name, 0)]:

@@ -2,6 +2,8 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from decimal import Decimal
 from pathlib import Path
+import platform
+import ssl
 from uuid import UUID, uuid4
 
 import httpx
@@ -11,7 +13,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
-from pymongo import MongoClient, ReturnDocument
+from pymongo import ReturnDocument
 from pymongo.errors import PyMongoError
 from redis import Redis
 from redis.exceptions import RedisError
@@ -19,6 +21,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.auth import SupabaseAuth
 from app.config import Settings
+from app.database import create_mongo_client
 from app.diagnostics import connection_failure
 from app.models import CATEGORIES, CartQuery, Login, Product, ProductInput, RecentInput
 from app.search import search_query
@@ -57,7 +60,7 @@ def create_app(settings=None, products=None, redis=None, auth=None):
 
     @asynccontextmanager
     async def lifespan(app):
-        mongo = MongoClient(settings.mongodb_uri, serverSelectionTimeoutMS=3000, tz_aware=True) if products is None else None
+        mongo = create_mongo_client(settings.mongodb_uri, tz_aware=True) if products is None else None
         cache = Redis.from_url(settings.redis_url, decode_responses=True, socket_timeout=3, socket_connect_timeout=3) if redis is None else redis
         client = httpx.Client(timeout=10)
         app.state.products = mongo[settings.mongodb_database].produtos if mongo is not None else products
@@ -155,7 +158,7 @@ def create_app(settings=None, products=None, redis=None, auth=None):
             results['redis'] = {'status': 'ok'}
         except RedisError as error:
             results['redis'] = connection_failure('Redis', error, settings.redis_url)
-        return {'dados': results}
+        return {'dados': results, 'ambiente': {'python': platform.python_version(), 'openssl': ssl.OPENSSL_VERSION, 'diagnostico': 'tls-ca-2'}}
 
     @app.post('/api/auth/logout', status_code=204)
     def logout(request: Request, user=Depends(admin), credentials=Depends(bearer)):

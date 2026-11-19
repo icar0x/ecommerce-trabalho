@@ -32,6 +32,8 @@ O HTML do painel é público, mas cada escrita na API exige token validado e UUI
 
 ## Configuração dos serviços
 
+No Render, a raiz do repositório inclui `.python-version` com a série 3.13, usando o patch mais recente dessa série. Se existir `PYTHON_VERSION` no painel do serviço, essa variável tem prioridade. Conexões MongoDB com TLS usam o conjunto de certificados do `certifi`, mantendo a validação de certificados e hostname; conexões locais sem TLS e CAs personalizadas na URI continuam respeitadas.
+
 O painel `/admin` inclui visão geral com indicadores do catálogo, estoque por categoria, mix de produtos, alertas de estoque e metas editáveis. O valor potencial do estoque usa preço de venda × quantidade e não representa faturamento; a loja ainda não registra pedidos/vendas. Metas sugeridas de catálogo/estoque podem ser alteradas e ficam salvas por conta **neste navegador**, não são sincronizadas entre dispositivos. Cadastro, edição e exclusão continuam disponíveis na seção Produtos e atualizam os indicadores.
 
 | Variável | Preencher com |

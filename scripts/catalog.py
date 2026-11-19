@@ -3,10 +3,11 @@ import json
 from pathlib import Path
 from urllib.parse import unquote
 
-from pymongo import ASCENDING, MongoClient
+from pymongo import ASCENDING
 from pymongo.errors import PyMongoError
 
 from app.config import Settings
+from app.database import create_mongo_client
 from app.main import STATIC, document, utc_now
 from app.models import ProductInput
 
@@ -42,7 +43,7 @@ def seed_catalog(collection):
 if __name__ == '__main__':
     try:
         settings = Settings()
-        with MongoClient(settings.mongodb_uri, serverSelectionTimeoutMS=7000) as client:
+        with create_mongo_client(settings.mongodb_uri, serverSelectionTimeoutMS=7000) as client:
             print(f'{seed_catalog(client[settings.mongodb_database].produtos)} produto(s) inserido(s).')
     except PyMongoError:
         raise SystemExit('Não foi possível cadastrar: conexão com MongoDB indisponível.') from None
