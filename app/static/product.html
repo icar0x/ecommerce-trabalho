@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Produto • Impulso</title><link rel="stylesheet" href="/static/shop.css"><script type="module" src="/static/product.js"></script></head>
+<body><a class="skip-link" href="#main">Pular para o conteúdo</a><header id="shop-header"></header>
+<main id="main" class="product-main"><div class="wrap"><nav class="breadcrumbs" aria-label="Navegação"><a href="/">Início</a><span>/</span><a href="/#catalogo">Produtos</a><span>/</span><span id="breadcrumb-product">Detalhes</span></nav><div id="product-status" class="state-panel" role="status">Carregando produto…</div>
+<article id="product-detail" class="product-detail" hidden>
+  <div class="detail-visual"><img id="product-image" alt="" width="700" height="700"><span class="image-note" id="image-note" hidden>Imagem ilustrativa</span></div>
+  <div class="detail-info"><p id="product-category" class="eyebrow"></p><h1 id="product-name"></h1><p id="product-price" class="detail-price"></p><p id="product-stock" class="stock-label"></p><p id="product-description" class="description"></p>
+    <form id="add-form"><label for="quantity">Quantidade</label><div class="buy-controls"><div class="quantity-control"><button id="minus" type="button" aria-label="Diminuir quantidade">−</button><input id="quantity" name="quantidade" type="number" min="1" max="99" step="1" value="1" inputmode="numeric" required aria-label="Quantidade"><button id="plus" type="button" aria-label="Aumentar quantidade">+</button></div><button id="add-product" class="btn btn-dark" type="submit"><span data-icon="bag"></span>Adicionar ao carrinho</button></div></form>
+    <p class="detail-cart-link"><a href="/carrinho">Ver meu carrinho</a></p><div class="detail-tip"><span data-icon="heart"></span><p>Escolha o que acompanha seu ritmo.<br>Seu carrinho fica salvo neste navegador.</p></div>
+  </div>
+</article><p id="history-message" class="secondary-note" role="status"></p></div>
+<section id="recent-section" class="recent-section" hidden><div class="wrap"><div class="section-heading"><div><p class="eyebrow">NO SEU RADAR</p><h2>Você também viu</h2></div><a href="/#catalogo" class="text-link">Explorar todos</a></div><div id="recent-grid" class="product-grid recent-grid"></div></div></section>
+</main><footer id="shop-footer"></footer><div id="toast" class="toast" role="status" aria-live="polite" hidden></div></body></html>

@@ -9,8 +9,8 @@ from app.models import ProductInput
 
 SAMPLES = [
     ('camiseta', 'Camiseta de treino', 'Roupas', '79.90', 15),
-    ('bola', 'Bola de futebol', 'Equipamentos', '129.90', 8),
-    ('tenis', 'Tênis de corrida', 'Calçados', '299.90', 12),
+    ('shorts', 'Shorts esportivo', 'Roupas', '89.90', 8),
+    ('tenis', 'Tênis de corrida', 'Tênis', '299.90', 12),
     ('garrafa', 'Garrafa esportiva 750 ml', 'Acessórios', '39.90', 30),
 ]
 

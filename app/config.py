@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     supabase_key: str = ''
     admin_user_ids: str = ''
     cookie_secure: bool = False
+    loja_nome: str = 'Impulso'
 
     @field_validator('admin_user_ids')
     @classmethod

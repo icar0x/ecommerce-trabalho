@@ -20,7 +20,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.auth import SupabaseAuth
 from app.config import Settings
-from app.models import Login, Product, ProductInput, RecentInput
+from app.models import CATEGORIES, CartQuery, Login, Product, ProductInput, RecentInput
 
 STATIC = Path(__file__).parent / 'static'
 TTL = 7 * 24 * 60 * 60
@@ -123,6 +123,20 @@ def create_app(settings=None, products=None, redis=None, auth=None):
     def login(body: Login, request: Request):
         return {'dados': request.app.state.auth.login(str(body.email), body.password)}
 
+    @app.get('/api/loja')
+    def store_info():
+        return {'dados': {'nome': settings.loja_nome}}
+
+    @app.get('/api/categorias')
+    def categories():
+        return {'dados': list(CATEGORIES)}
+
+    @app.post('/api/carrinho/consultar')
+    def cart_products(body: CartQuery, request: Request):
+        ids = [ObjectId(value) for value in body.produtoIds]
+        docs = request.app.state.products.find({'_id': {'$in': ids}})
+        return {'dados': [serialize(doc) for doc in docs]}
+
     @app.get('/api/auth/me')
     def me(user=Depends(admin)):
         return {'dados': {'id': user['id'], 'email': user.get('email')}}
@@ -195,6 +209,15 @@ def create_app(settings=None, products=None, redis=None, auth=None):
     @app.get('/admin/login', include_in_schema=False)
     def login_page():
         return FileResponse(STATIC / 'login.html')
+
+    @app.get('/produtos/{id}', include_in_schema=False)
+    def product_page(id: str):
+        object_id(id)
+        return FileResponse(STATIC / 'product.html')
+
+    @app.get('/carrinho', include_in_schema=False)
+    def cart_page():
+        return FileResponse(STATIC / 'cart.html')
 
     @app.get('/admin', include_in_schema=False)
     def admin_page():

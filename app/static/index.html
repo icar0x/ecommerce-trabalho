@@ -1,3 +1,39 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Esporte • Projeto</title><link rel="stylesheet" href="/static/style.css"></head>
-<body><main class="welcome"><p class="eyebrow">E-COMMERCE ESPORTIVO</p><h1>Base pronta.<br>Próxima etapa: a vitrine.</h1><p>Projeto acadêmico de Banco de Dados. O catálogo público pode ser consultado pela API.</p><nav><a class="button" href="/admin/login">Área administrativa</a><a href="/docs">Documentação da API →</a></nav></main></body></html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Roupas, tênis e acessórios para o seu próximo movimento. Encontre o que acompanha o seu estilo.">
+  <title>Impulso • Seu próximo movimento</title>
+  <link rel="stylesheet" href="/static/shop.css"><script type="module" src="/static/catalog.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Pular para o conteúdo</a>
+  <header id="shop-header"></header>
+  <main id="main">
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-copy"><p class="eyebrow">SEU ESTILO. SEU MOVIMENTO.</p><h1 id="hero-title">Supere seus<br>próprios limites.</h1><p>Encontre o que te move.<br>Dentro e fora do treino.</p><div class="hero-actions"><a class="btn btn-dark" href="#catalogo">Explorar produtos</a><a class="btn btn-outline" href="#categorias">Ver categorias</a></div></div>
+      <div class="hero-caption" aria-hidden="true"><span>Feito para acompanhar você</span><strong>Em cada movimento.</strong><div class="hero-caption-line"></div></div>
+    </section>
+    <section class="collections-strip wrap" aria-label="Explore nossas coleções"><span class="collections-label">ENCONTRE SEU ESTILO</span><a href="/?categoria=Roupas#catalogo" class="activity-word">EVERYDAY<span>ROUPAS PARA O SEU RITMO</span></a><a href="/?categoria=T%C3%AAnis#catalogo" class="activity-word running-word">SNEAKERS</a><a href="/?categoria=Acess%C3%B3rios#catalogo" class="activity-word">ESSENTIALS</a><a href="#catalogo" class="text-link">Ver tudo</a></section>
+    <section id="categorias" class="wrap category-section" aria-labelledby="category-title"><div class="section-heading compact-heading"><h2 id="category-title">Explore por categoria</h2><a href="#catalogo" class="text-link">Ver todos os produtos</a></div><div id="visual-categories" class="visual-categories">
+      <a class="category-card" href="/?categoria=Roupas#catalogo" data-category="Roupas"><span class="category-photo"><img src="/static/assets/category-clothing.jpg" alt="" width="360" height="250" loading="lazy"></span><span>Roupas</span></a>
+      <a class="category-card" href="/?categoria=T%C3%AAnis#catalogo" data-category="Tênis"><span class="category-photo"><img src="/static/assets/category-shoes.jpg" alt="" width="360" height="250" loading="lazy"></span><span>Tênis</span></a>
+      <a class="category-card" href="/?categoria=Acess%C3%B3rios#catalogo" data-category="Acessórios"><span class="category-photo"><img src="/static/assets/category-accessories.jpg" alt="" width="360" height="250" loading="lazy"></span><span>Acessórios</span></a>
+    </div></section>
+    <section id="catalogo" class="wrap catalog-section" aria-labelledby="catalog-title">
+      <div class="section-heading compact-heading"><h2 id="catalog-title">Escolhas para o seu próximo passo</h2><a href="#catalogo" id="view-all-products" class="text-link">Ver tudo</a></div>
+      <form id="catalog-filters" class="catalog-filters" role="search">
+        <div id="category-tabs" class="category-tabs" aria-label="Categorias"><button type="button" class="chip active" data-category="" aria-pressed="true">Todos os produtos</button></div>
+        <div class="search-field"><label class="sr-only" for="search">Buscar produtos pelo nome</label><i data-icon="search"></i><input id="search" name="busca" type="search" placeholder="O que você procura?" maxlength="160"><button type="submit" class="search-submit" aria-label="Buscar">Buscar</button></div>
+      </form>
+      <div class="catalog-meta"><p id="result-count" aria-live="polite">Buscando produtos…</p><button type="button" id="clear-filters" class="text-button" hidden>Limpar filtros</button></div>
+      <div id="catalog-status" class="state-panel" role="status">Preparando seu próximo movimento…</div>
+      <div id="product-grid" class="product-grid" aria-label="Produtos" aria-busy="true"></div>
+      <nav id="pagination" class="pagination" aria-label="Paginação" hidden><button id="previous-page" class="btn btn-outline" type="button">Anterior</button><span id="page-label"></span><button id="next-page" class="btn btn-outline" type="button">Próxima</button></nav>
+    </section>
+    <section id="recent-section" class="recent-section" hidden><div class="wrap"><div class="section-heading"><div><p class="eyebrow">CONTINUE EXPLORANDO</p><h2>De olho nesses?</h2></div><p>Os produtos que você viu por aqui.</p></div><div id="recent-grid" class="product-grid recent-grid"></div></div></section>
+    <section class="editorial-banner wrap" aria-labelledby="editorial-title"><div><p class="eyebrow">MOVIMENTO É PARA TODOS</p><h2 id="editorial-title">Seu estilo.<br>Suas regras.</h2><p>Vista o que acompanha o seu ritmo.</p><a class="btn btn-white" href="/?categoria=Roupas#catalogo">Explorar roupas</a></div><span class="editorial-type" aria-hidden="true">GO<br><em>BEYOND.</em></span></section>
+    <section class="service-strip wrap" aria-label="Como funciona"><article><span data-icon="search"></span><div><h3>Encontre seu favorito</h3><p>Produtos para cada movimento.</p></div></article><article><span data-icon="bag"></span><div><h3>Seu carrinho, salvo</h3><p>Continue de onde parou.</p></div></article><article><span data-icon="history"></span><div><h3>Vistos recentemente</h3><p>Reencontre o que chamou atenção.</p></div></article><article><span data-icon="check"></span><div><h3>Escolha no seu ritmo</h3><p>Consulte detalhes e disponibilidade.</p></div></article></section>
+  </main>
+  <footer id="shop-footer"></footer><div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body></html>

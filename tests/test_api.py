@@ -77,7 +77,7 @@ def test_crud_and_search(setup):
     assert client.get(f'/api/produtos/{pid}').json()['dados'] == product
     assert client.get('/api/produtos?busca=CAMI&categoria=Roupas').json()['total'] == 1
     assert client.get('/api/produtos?busca=.*').json()['total'] == 0
-    assert client.get('/api/produtos?categoria=Calçados').json()['total'] == 0
+    assert client.get('/api/produtos?categoria=T%C3%AAnis').json()['total'] == 0
     updated = client.put(f'/api/produtos/{pid}', json={**PRODUCT, 'preco': '0.10', 'estoque': 0}, headers=HEADERS).json()['dados']
     assert updated['preco'] == '0.10'
     assert updated['criadoEm'] == product['criadoEm']
@@ -87,7 +87,7 @@ def test_crud_and_search(setup):
         assert client.request(method, '/api/produtos/invalid', json=PRODUCT, headers=HEADERS).status_code == 400
 
 
-@pytest.mark.parametrize('field,value', [('nome', ''), ('nome', '   '), ('preco', '0'), ('preco', '-1'), ('preco', '1.001'), ('preco', 'NaN'), ('preco', 'Infinity'), ('estoque', -1), ('estoque', 1.2), ('estoque', True), ('imagemUrl', 'javascript:alert(1)'), ('imagemUrl', 'invalid')])
+@pytest.mark.parametrize('field,value', [('nome', ''), ('nome', '   '), ('preco', '0'), ('preco', '-1'), ('preco', '1.001'), ('preco', 'NaN'), ('preco', 'Infinity'), ('estoque', -1), ('estoque', 1.2), ('estoque', True), ('imagemUrl', 'javascript:alert(1)'), ('imagemUrl', 'invalid'), ('categoria', ''), ('categoria', 'Equipamentos'), ('categoria', 'Outra')])
 def test_validation(setup, field, value):
     client = setup[0]
     assert client.post('/api/produtos', json={**PRODUCT, field: value}, headers=HEADERS).status_code == 422
@@ -132,10 +132,10 @@ def test_recent_history(setup):
 def test_seed_preserves_edits(setup):
     client, collection, _, _ = setup
     assert seed(collection) == 4
-    collection.update_one({'demoKey': 'bola'}, {'$set': {'nome': 'Nome editado'}})
+    collection.update_one({'demoKey': 'shorts'}, {'$set': {'nome': 'Nome editado'}})
     assert seed(collection) == 0
     assert collection.count_documents({}) == 4
-    assert collection.find_one({'demoKey': 'bola'})['nome'] == 'Nome editado'
+    assert collection.find_one({'demoKey': 'shorts'})['nome'] == 'Nome editado'
     response = client.get('/api/produtos?limite=2&pagina=2').json()
     assert response['total'] == 4
     assert len(response['dados']) == 2
@@ -144,7 +144,7 @@ def test_seed_preserves_edits(setup):
 
 def test_pages_and_no_password_echo(setup):
     client = setup[0]
-    for path in ['/', '/admin', '/admin/login', '/static/admin.js', '/docs', '/openapi.json']:
+    for path in ['/', '/carrinho', f'/produtos/{ObjectId()}', '/admin', '/admin/login', '/static/admin.js', '/static/shop.css', '/static/catalog.js', '/static/shop-core.mjs', '/docs', '/openapi.json']:
         assert client.get(path).status_code == 200
     response = client.post('/api/auth/login', json={'email': 'invalid', 'password': ''})
     assert response.status_code == 422
@@ -184,3 +184,23 @@ def test_supabase_network_and_missing_configuration():
         with pytest.raises(HTTPException) as error:
             auth.login('admin@example.com', 'password')
         assert error.value.status_code == 503
+
+
+def test_catalog_categories_and_cart_queries(setup):
+    client, collection, _, _ = setup
+    assert client.get('/api/loja').json()['dados']['nome'] == 'Impulso'
+    assert client.get('/api/categorias').json()['dados'] == ['Roupas', 'Tênis', 'Acessórios']
+    first = create(client)
+    second = create(client, nome='Tênis casual', categoria='Tênis')
+    create(client, nome='Boné', categoria='Acessórios')
+    assert client.get('/api/categorias').json()['dados'] == ['Roupas', 'Tênis', 'Acessórios']
+    assert client.get('/api/produtos?categoria=T%C3%AAnis').json()['total'] == 1
+    response = client.post('/api/carrinho/consultar', json={'produtoIds': [first['id'], second['id'], str(ObjectId())]})
+    assert response.status_code == 200
+    assert {p['id'] for p in response.json()['dados']} == {first['id'], second['id']}
+    assert response.json()['dados'][0]['preco'] == '79.90'
+    collection.delete_one({'_id': ObjectId(first['id'])})
+    assert client.post('/api/carrinho/consultar', json={'produtoIds': [first['id']]}).json()['dados'] == []
+    assert client.post('/api/carrinho/consultar', json={'produtoIds': []}).json()['dados'] == []
+    assert client.post('/api/carrinho/consultar', json={'produtoIds': ['bad']}).status_code == 422
+    assert client.post('/api/carrinho/consultar', json={'produtoIds': [first['id']] * 51}).status_code == 422

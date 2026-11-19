@@ -1,6 +1,6 @@
 # E-commerce de artigos esportivos
 
-Base acadêmica em Python/FastAPI. MongoDB guarda os produtos, Redis guarda o histórico anônimo e Supabase Auth autentica os administradores. A aplicação serve o próprio HTML/CSS/JS. Nenhum cadastro de cliente, carrinho ou pedido é implementado nesta etapa.
+Loja de artigos esportivos em Python/FastAPI e HTML/CSS/JavaScript. MongoDB guarda os produtos, Redis guarda o histórico anônimo e Supabase Auth autentica os administradores. Inclui vitrine responsiva, detalhes, vistos recentemente, carrinho no navegador e painel administrativo. A finalização pelo WhatsApp fica para a próxima etapa.
 
 ## Executar no Windows PowerShell
 
@@ -21,7 +21,9 @@ python -m uvicorn app.main:app --reload
 
 Se a ativação do ambiente for bloqueada, use diretamente `.\.venv\Scripts\python.exe` no lugar de `python`, sem precisar alterar a política de execução. No Linux/macOS: `python3 -m venv .venv` e `source .venv/bin/activate`; os demais comandos são os mesmos. Execute sempre a partir da raiz do repositório.
 
-- Início provisório: http://127.0.0.1:8000/
+- Loja: http://127.0.0.1:8000/
+- Detalhe: http://127.0.0.1:8000/produtos/ID_DO_PRODUTO
+- Carrinho: http://127.0.0.1:8000/carrinho
 - Login: http://127.0.0.1:8000/admin/login
 - Painel: http://127.0.0.1:8000/admin
 - API interativa: http://127.0.0.1:8000/docs
@@ -39,6 +41,7 @@ O HTML do painel é público, mas cada escrita na API exige token validado e UUI
 | `SUPABASE_KEY` | Chave pública publishable ou anon do projeto |
 | `ADMIN_USER_IDS` | UUIDs autorizados separados por vírgula; vazio bloqueia todos |
 | `COOKIE_SECURE` | `false` no HTTP local, `true` com HTTPS |
+| `LOJA_NOME` | Nome da loja, padrão `Impulso`; pode ser alterado sem editar o HTML |
 
 O `.env` é ignorado pelo Git. Não coloque credenciais no README ou no código. A aplicação não precisa de chave `service_role` nem `sb_secret_...`.
 
@@ -74,6 +77,9 @@ Todas as rotas usam o prefixo `/api`. Sucesso retorna `{"dados": ...}`; listagem
 | `DELETE /api/produtos/{id}` | Exclui; administrador; 204 |
 | `POST /api/recentes` | Corpo `{"produtoId":"<id>"}`; registra visualização |
 | `GET /api/recentes` | Produtos atuais do histórico, mais recente primeiro |
+| `GET /api/loja` | Nome público da loja; nenhuma credencial é retornada |
+| `GET /api/categorias` | Lista fixa: `Roupas`, `Tênis` e `Acessórios`, inclusive com catálogo vazio |
+| `POST /api/carrinho/consultar` | Corpo `{"produtoIds":["<id>"]}`; dados atuais de até 50 produtos, sem exigir login |
 
 As rotas protegidas recebem `Authorization: Bearer <access_token>`. No Swagger, use Authorize após obter o token. Busca faz correspondência parcial por nome sem diferenciar maiúsculas; caracteres de expressão regular são tratados literalmente. Categoria usa correspondência exata. A listagem ordena por criação decrescente, com desempate por ID. O painel usa páginas de 20 produtos.
 
@@ -108,13 +114,13 @@ Exemplo de resposta individual:
 }
 ```
 
-**Dinheiro:** `preco` usa `Decimal` em Python e BSON `Decimal128` no MongoDB; na resposta JSON é **string com duas casas decimais**. Prefira enviar string com ponto decimal. Também são aceitos números JSON que respeitem a validação, mas não devem ser usados para cálculos monetários no cliente. Máximo 12 dígitos totais e duas casas; mais de duas casas são rejeitadas, sem arredondamento silencioso. Para o carrinho futuro, converta a string em centavos inteiros antes de somar; `Number(preco)` é adequado apenas para formatar a exibição.
+**Dinheiro:** `preco` usa `Decimal` em Python e BSON `Decimal128` no MongoDB; na resposta JSON é **string com duas casas decimais**. Prefira enviar string com ponto decimal. Também são aceitos números JSON que respeitem a validação, mas não devem ser usados para cálculos monetários no cliente. Máximo 12 dígitos totais e duas casas; mais de duas casas são rejeitadas, sem arredondamento silencioso. O frontend da loja converte preços em centavos inteiros para somar e multiplicar, e só depois formata o resultado em reais.
 
-Nome é obrigatório; descrição e categoria podem ser vazias; preço é positivo; estoque é inteiro não negativo (booleanos e frações são rejeitados). Imagem aceita apenas URL HTTP/HTTPS, `null`, campo omitido ou texto vazio. Sem upload. PUT exige nome, preço e estoque; campos opcionais omitidos voltam aos padrões. Os timestamps são UTC e ObjectId aparece como `id` string. Campos extras de entrada são rejeitados.
+Nome e categoria são obrigatórios; categoria aceita apenas `Roupas`, `Tênis` ou `Acessórios`. Descrição pode ser vazia; preço é positivo; estoque é inteiro não negativo (booleanos e frações são rejeitados). Imagem aceita apenas URL HTTP/HTTPS, `null`, campo omitido ou texto vazio. Sem upload. PUT exige nome, categoria, preço e estoque; campos opcionais omitidos voltam aos padrões. Os timestamps são UTC e ObjectId aparece como `id` string. Campos extras de entrada são rejeitados.
 
 ### Cookie e histórico
 
-Ao abrir detalhes de um produto, o colega deve chamar explicitamente:
+Ao abrir detalhes de um produto, `product.js` chama explicitamente:
 
 ```javascript
 const produto = await fetch(`/api/produtos/${id}`).then(r => r.json());
@@ -130,9 +136,30 @@ const recentes = await fetch('/api/recentes', {
 // produto.dados é um produto; recentes.dados é uma lista.
 ```
 
-O UUID é criado pelo backend no cookie `visitante` (HttpOnly, SameSite=Lax, validade de 7 dias); não use `document.cookie` nem localStorage para esse identificador. O frontend deve ser servido pela mesma aplicação: adicione seus arquivos em `app/static` e substitua o início provisório. Não há CORS habilitado para origens externas.
+O UUID é criado pelo backend no cookie `visitante` (HttpOnly, SameSite=Lax, validade de 7 dias); não use `document.cookie` nem localStorage para esse identificador. O frontend está em `app/static` e é servido pela mesma aplicação. Não abra os arquivos HTML diretamente nem use Live Server em outra porta. Não há CORS habilitado para origens externas.
 
 O Redis armazena somente IDs em `recentes:<uuid>`. A transação LREM/LPUSH/LTRIM/EXPIRE evita duplicatas, move revisitas ao início e limita a dez itens. O TTL de sete dias é renovado apenas pelo POST; GET não renova o TTL do Redis. GET consulta dados atuais no MongoDB e ignora produtos excluídos. GET de produto não registra histórico. O cookie é anônimo, não uma identidade autenticada; apagar o cookie inicia outro histórico. O estoque só é cadastrado e consultado.
+
+### Frontend e carrinho
+
+- `index.html` / `catalog.js`: busca por nome, categorias provenientes do banco, paginação e recentes.
+- `product.html` / `product.js`: detalhes, disponibilidade e quantidade; registra a visita explicitamente no Redis.
+- `cart.html` / `cart.js`: quantidades, remoção, esvaziamento e resumo com preços atuais.
+- `shop.js`: componentes compartilhados, imagens de apoio, cabeçalho, rodapé e persistência.
+- `shop-core.mjs`: normalização do carrinho, centavos e cálculo dos totais; testável com Node.
+- `shop.css`: estilos exclusivos da loja, sem alterar o painel administrativo.
+
+O layout da loja segue a referência enviada: preto e branco, acento discreto dourado, banner fotográfico, categorias em cartões e rodapé em colunas. A logo e a paleta definitiva estão adiadas; a versão atual usa o nome textual provisório. O sistema visual está descrito em `DESIGN.md`; origem das fotografias e prompt do banner em `app/static/assets/README.md`. As imagens de categorias são locais e ilustrativas; não criam produtos ou descontos. Os prompts experimentais de camisas não fazem parte do projeto salvo.
+
+Favoritos: o coração dos cartões salva até 50 produtos no localStorage (`impulso_favorites_v1`). O ícone no cabeçalho abre a lista de favoritos, com busca, filtros e dados atuais dos produtos. Funciona sem conta e permanece restrito ao navegador utilizado.
+
+O carrinho guarda somente `{id, quantidade}` no localStorage, na chave `impulso_cart_v1`. Limites: 50 produtos diferentes e 99 unidades por produto, respeitando o estoque exibido. Dados inválidos do armazenamento são descartados; quantidades duplicadas são consolidadas. Mudanças em outra aba atualizam o indicador e o carrinho. Quando o armazenamento está bloqueado, a página avisa que não poderá preservar os itens na navegação.
+
+Ao abrir ou retomar o carrinho, o frontend consulta os dados atuais em uma única chamada a `/api/carrinho/consultar`. Produtos excluídos continuam visíveis para remoção e não entram no subtotal. Estoque insuficiente é sinalizado e pode ser corrigido pelo usuário. Não há reserva nem baixa de estoque. Adicionar ao carrinho não cria um pedido.
+
+Imagens usam a URL cadastrada no painel, com ilustração local de apoio caso não exista ou não carregue. Nomes e descrições são inseridos como texto, sem interpretar HTML. A vitrine trata catálogo vazio, busca sem resultado, carregamento e indisponibilidade da API; falha no histórico não impede consultar o produto.
+
+**WhatsApp adiado:** não há número configurado, botão de envio funcional, pagamento ou criação de pedido. O resumo informa que essa opção estará disponível em breve. O nome `Impulso` é provisório; configure `LOJA_NOME` no `.env` e reinicie para trocar.
 
 ## Dados de demonstração
 
@@ -148,9 +175,20 @@ Insere quatro produtos com marcadores internos `demoKey` e índice único espars
 python -m pip install -r requirements-dev.txt
 python -m pytest -q
 python -m compileall -q app scripts tests
+# Opcional para os testes de lógica do carrinho: Node.js 20+.
+node --test tests/shop-core.test.mjs
 ```
 
-Os testes usam **mongomock, fakeredis e transporte HTTP simulado**, injetados somente pela fábrica de aplicação. Verificam login e rejeições, autorização das três escritas, CRUD, precisão do preço, validações, busca, histórico separado, ordenação, duplicatas, limite, renovação de TTL, produtos excluídos, páginas e seed idempotente. Não comprovam conectividade com serviços reais nem o comportamento visual no navegador.
+Os testes Python usam **mongomock, fakeredis e transporte HTTP simulado**, injetados somente pela fábrica de aplicação. Verificam login e rejeições, autorização das três escritas, CRUD, precisão do preço, validações, busca, histórico separado, ordenação, duplicatas, limite, renovação de TTL, produtos excluídos, páginas, categorias, consulta do carrinho e seed idempotente. Os testes Node verificam centavos, armazenamento adulterado, limites e resumo com estoque atualizado/produtos excluídos. Esses testes não comprovam conectividade com serviços reais.
+
+Para QA de navegador opcional no Windows, com Edge instalado e servidor rodando em `http://127.0.0.1:8000`:
+
+```powershell
+python -m pip install playwright
+python -m scripts.check_frontend
+```
+
+Esse comando usa os serviços **reais do `.env`**, cria dois produtos temporários, verifica os fluxos em navegador isolado e remove seus próprios dados ao final. Não usa o perfil do navegador pessoal. Salva capturas desktop/mobile em `.artifacts/` (ignorado no Git). Não precisa baixar outro navegador: utiliza o Edge instalado. Se o teste for interrompido à força antes da limpeza, remova pelo painel apenas os produtos cujo nome contenha o identificador `QA-` daquela execução.
 
 Para validar integrações reais após preencher `.env`:
 
@@ -163,17 +201,18 @@ Para validar integrações reais após preencher `.env`:
 
 Sem credenciais reais não é possível confirmar o login/Supabase, CRUD persistente ou histórico no Redis remoto. O sucesso dos testes locais não substitui esse roteiro.
 
-## Divisão do trabalho
+## Estado do projeto
 
 - [x] Backend FastAPI, configuração e serviços reais no runtime.
 - [x] Login/logout Supabase e autorização por UUID.
 - [x] Painel administrativo com cadastro, edição, exclusão confirmada, filtros e mensagens.
 - [x] API pública, histórico Redis, seed e testes de regras.
 - [x] Documentação do contrato para continuação no mesmo repositório.
-- [ ] Colega: vitrine, detalhes e acabamento visual do cliente.
-- [ ] Colega: exibição de recentes e chamada explícita do POST ao abrir detalhes.
-- [ ] Colega: carrinho em localStorage e finalização pelo WhatsApp.
-- [ ] Dupla: preencher credenciais, validar os três serviços reais e gravar vídeo demonstrativo para entrega em 26/11.
+- [x] Vitrine, detalhes e layout responsivo do cliente.
+- [x] Exibição de recentes e chamada explícita do POST ao abrir detalhes.
+- [x] Carrinho em localStorage com dados atuais e totais em centavos.
+- [ ] Finalização pelo WhatsApp, adiada a pedido do responsável pelo projeto.
+- [ ] Revisão final e vídeo demonstrativo para entrega em 26/11.
 
 Não estão no escopo pagamento, frete, cadastro de clientes, gestão de pedidos e baixa automática de estoque. Nenhum push, deploy ou publicação é feito pela implementação local.
 
