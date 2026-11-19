@@ -1,4 +1,4 @@
-import {api, ready, getCart, addToCart, toast, money, toCents, setProductImage, loadRecent, showState, element} from './shop.js?v=20261119-footer-logo1';
+import {api, ready, getCart, addToCart, toast, money, toCents, setProductImage, loadRecent, showState, element} from './shop.js?v=20261119-responsive1';
 import {variantInfo} from './product-variants.mjs';
 import {fetchAllProducts} from './products-api.mjs';
 
@@ -68,8 +68,8 @@ async function load() {
   status.hidden = false; status.textContent = 'Carregando produto…';
   try {
     const {dados} = await api(`/api/produtos/${id}`); product = dados;
-    const store = await ready;
-    document.title = `${product.nome} • ${store.nome}`;
+    document.title = `${product.nome} • Impulso`;
+    ready.then(store => { document.title = `${product.nome} • ${store.nome}`; });
     for (const key of ['product-name', 'breadcrumb-product']) document.getElementById(key).textContent = product.nome;
     document.querySelector('#product-category').textContent = product.categoria || 'Esportes';
     document.querySelector('#product-price').textContent = money(toCents(product.preco));

@@ -1,4 +1,4 @@
-import {api, ready, getCart, saveCart, toast, element, icon, setProductImage, money, showState} from './shop.js?v=20261119-footer-logo1';
+import {api, getCart, saveCart, toast, element, icon, setProductImage, money, showState} from './shop.js?v=20261119-responsive1';
 import {cartSummary, toCents} from './shop-core.mjs';
 
 const status = document.querySelector('#cart-status');
@@ -111,5 +111,4 @@ document.querySelector('#clear-cart').onclick = () => {
 };
 window.addEventListener('cartchange', () => { if (!changing) load(); });
 window.addEventListener('focus', load);
-await ready;
 await load();

@@ -1,4 +1,4 @@
-import {api, ready, element, productCard, loadRecent, showState, favoriteIds} from './shop.js?v=20261119-footer-logo1';
+import {api, element, productCard, loadRecent, showState, favoriteIds} from './shop.js?v=20261119-responsive1';
 import {initHero} from './hero.js';
 import {groupProducts} from './product-variants.mjs';
 import {fetchAllProducts} from './products-api.mjs';
@@ -154,7 +154,8 @@ async function loadShelves() {
         controls[1].disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
       };
       track.addEventListener('scroll', updateControls, {passive: true});
-      new ResizeObserver(updateControls).observe(track);
+      if ('ResizeObserver' in window) new ResizeObserver(updateControls).observe(track);
+      else window.addEventListener('resize', updateControls, {passive: true});
       heading.append(title, actions); section.append(heading, track); host.append(section);
       requestAnimationFrame(updateControls);
     }
@@ -163,7 +164,7 @@ async function loadShelves() {
   } finally { host.setAttribute('aria-busy', 'false'); }
 }
 
-await ready;
+// O cabeçalho é montado na importação; a consulta do nome da loja não bloqueia os produtos.
 if (!homeShelves) await loadCategories();
 await Promise.allSettled([load(), loadShelves(), loadRecent()]);
 // Voltar pelo navegador pode restaurar o HTML antigo sem executar os módulos outra vez.

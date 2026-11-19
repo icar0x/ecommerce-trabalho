@@ -1,5 +1,7 @@
 # Interface da loja
 
+Responsividade atual (19/11): todas as larguras mantêm as coleções, produtos, recentes e conteúdo do rodapé. Desktop e celular têm links Início/Loja/Roupas/Tênis/Acessórios; navegação quebra linhas nas telas menores. Carrosséis mobile mostram dois cartões por vez, com rolagem por toque e botões de 44 px; listagem mantém duas colunas no celular. Filtros quebram linhas para ficarem acessíveis. Títulos e ações podem ocupar linhas separadas. Atualização substitui o cartão de 76% da largura e a ocultação de parte dos recentes/rodapé no mobile. Identidade visual e composição geral preservadas.
+
 Logo no rodapé: variante `impulso-logo-footer.webp` com letras claras e detalhes verde-limão para o fundo preto, mantendo escudo preto e raio branco. Cabeçalho preserva a logo preta/verde original. Variante derivada com Imagegen, transparência e formato WebP, sem filtro monocromático.
 
 Otimização atual: todas as imagens ativas usam WebP; produtos têm variantes de 640 px e tamanho completo selecionadas por srcset/sizes. Logo transparente sem perdas; recortes preservam canal alpha. PNGs originais preservados para regenerar e atender URLs anteriores. Limpeza dos estilos de componentes já retirados, preservando aparência, tipografia, inclinação neutra dos produtos e demais interações aprovadas. Fontes, paleta e composições mantidas. Geração local: `python -m scripts.optimize_images`.
