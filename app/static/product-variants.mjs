@@ -1,15 +1,15 @@
 // Cores da coleção aprovada. Produtos desconhecidos permanecem independentes.
 const families = {
-  Aero: [['Graphite', '#555957'], ['Ice', '#eceee8'], ['Volt', '#171a16']],
-  Base: [['Black', '#171717'], ['Chalk', '#ecebe5'], ['Concrete', '#969b94']],
-  District: [['Mono', '#e6e6df'], ['Shadow', '#303231'], ['Lime', '#b7ff00']],
+  Aero: ['Graphite', 'Ice', 'Volt'],
+  Base: ['Black', 'Chalk', 'Concrete'],
+  District: ['Mono', 'Shadow', 'Lime'],
 };
 
 export function variantInfo(product) {
   if (product.categoria !== 'Tênis') return null;
   for (const [family, colors] of Object.entries(families)) {
-    for (const [color, swatch] of colors) {
-      if (product.nome === `Tênis Impulso ${family} ${color}`) return {family, color, swatch};
+    for (const color of colors) {
+      if (product.nome === `Tênis Impulso ${family} ${color}`) return {family, color};
     }
   }
   return null;

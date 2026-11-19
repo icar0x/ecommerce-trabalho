@@ -1,6 +1,7 @@
 import {CART_KEY, MAX_ITEMS, MAX_QUANTITY, normalizeCart, cartCount, money, toCents} from './shop-core.mjs';
-import {enableProductEffect} from './product-effects.js';
+import {enableProductEffect} from './product-effects.js?v=20261119-footer-logo1';
 import {variantInfo} from './product-variants.mjs';
+import {optimizedImages} from './optimized-images.mjs';
 
 export {money, toCents};
 let cart = [];
@@ -18,8 +19,6 @@ const paths = {
   trash: '<path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/>',
   message: '<path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-4-.9L3 21l1.9-5.5a9 9 0 0 1-.9-4A8.5 8.5 0 1 1 21 11.5Z"/><path d="M8 10h8M8 14h5"/>',
   user: '<circle cx="12" cy="7" r="4"/><path d="M4 22v-2a8 8 0 0 1 16 0v2"/>',
-  check: '<path d="m12 3 8 4v6c0 4-8 8-8 8s-8-4-8-8V7l8-4Z"/><path d="m8 12 3 3 5-6"/>',
-  history: '<path d="M3 11a9 9 0 1 1 2 7M3 4v7h7M12 7v5l3 2"/>',
 };
 
 export function icon(name) {
@@ -152,18 +151,25 @@ export function toast(text, cartLink = false) {
 export function setProductImage(image, product, onFallback) {
   const fallback = '/static/product-placeholder.svg';
   let url = fallback;
+  image.removeAttribute('srcset');
   if (product.imagemUrl) {
     try {
       const candidate = new URL(product.imagemUrl, location.origin);
-      if (['http:', 'https:'].includes(candidate.protocol)) url = candidate.href;
+      if (['http:', 'https:'].includes(candidate.protocol)) {
+        const optimized = candidate.origin === location.origin ? optimizedImages[candidate.pathname] : null;
+        url = optimized ? new URL(optimized.src, location.origin).href : candidate.href;
+        if (optimized?.thumbnail && image.sizes) image.srcset = `${optimized.thumbnail} ${optimized.thumbnailWidth}w, ${optimized.src} ${optimized.width}w`;
+      }
     } catch { /* URL inválida recebe ilustração local. */ }
   }
   image.alt = product.nome;
   image.referrerPolicy = 'no-referrer';
-  image.addEventListener('error', () => {
+  image.onerror = () => {
+    image.onerror = null;
+    image.removeAttribute('srcset');
     image.src = fallback;
     onFallback?.();
-  }, {once: true});
+  };
   image.src = url;
   if (url === fallback) onFallback?.();
 }
@@ -173,6 +179,7 @@ export function productCard(product, variants = []) {
   const photo = element('a', 'product-photo'); photo.href = `/produtos/${product.id}`;
   photo.tabIndex = -1; photo.setAttribute('aria-hidden', 'true');
   const image = element('img'); image.width = 400; image.height = 430; image.loading = 'lazy';
+  image.decoding = 'async'; image.sizes = '(max-width:560px) 76vw, (max-width:1100px) 30vw, 260px';
   setProductImage(image, product);
   photo.append(image);
   if (!product.estoque) photo.append(element('span', 'product-badge sold-out', 'Esgotado'));
@@ -273,22 +280,85 @@ function applyBrandLogo() {
       brand.replaceChildren(image);
       brand.classList.add('brand-logo-frame');
     };
-    image.src = '/static/assets/impulso-logo-transparent.png';
+    image.src = brand.closest('#shop-footer')
+      ? '/static/assets/impulso-logo-footer.webp'
+      : '/static/assets/impulso-logo-transparent.webp';
   }
+}
+
+function setupAssistant() {
+  const widget = element('div', 'assistant-widget');
+  const toggle = element('button', 'assistant-toggle'); toggle.type = 'button';
+  toggle.setAttribute('aria-label', 'Abrir atendimento Impulso');
+  toggle.setAttribute('aria-expanded', 'false'); toggle.setAttribute('aria-controls', 'assistant-panel');
+  const symbol = element('span', 'assistant-symbol'); symbol.append(icon('message'));
+  toggle.append(symbol, element('span', 'assistant-label', 'Atendimento'), element('span', 'assistant-badge', 'IA'));
+  const panel = element('section', 'assistant-panel'); panel.id = 'assistant-panel'; panel.hidden = true;
+  panel.setAttribute('aria-labelledby', 'assistant-title');
+  const heading = element('div', 'assistant-heading');
+  const title = element('h2', '', 'Atendimento Impulso'); title.id = 'assistant-title';
+  const close = element('button', 'assistant-close', '×'); close.type = 'button';
+  close.setAttribute('aria-label', 'Fechar atendimento');
+  heading.append(title, close);
+  const body = element('div', 'assistant-body');
+  body.append(element('span', 'assistant-soon', 'Em breve'),
+    element('h3', '', 'Um novo jeito de ajudar.'),
+    element('p', '', 'Nosso assistente está chegando. Em breve, tire suas dúvidas sobre os produtos por aqui.'));
+  panel.append(heading, body); widget.append(panel, toggle); document.body.append(widget);
+  function setOpen(open, restoreFocus = false) {
+    panel.hidden = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Fechar atendimento Impulso' : 'Abrir atendimento Impulso');
+    if (open) close.focus({preventScroll: true});
+    else if (restoreFocus) toggle.focus({preventScroll: true});
+  }
+  toggle.onclick = () => setOpen(panel.hidden);
+  close.onclick = () => setOpen(false, true);
+  widget.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !panel.hidden) { event.preventDefault(); setOpen(false, true); }
+  });
+  document.addEventListener('click', event => { if (!widget.contains(event.target)) setOpen(false); });
+  widget.addEventListener('focusout', event => {
+    if (event.relatedTarget && !widget.contains(event.relatedTarget)) setOpen(false);
+  });
+}
+
+function setupHeaderSearch(header) {
+  const toggle = header.querySelector('.search-link');
+  const panel = element('div', 'header-search-panel'); panel.id = 'header-search-panel'; panel.hidden = true;
+  const form = element('form', 'header-search-form wrap');
+  form.action = '/loja'; form.method = 'get'; form.setAttribute('role', 'search');
+  const label = element('label', 'sr-only', 'Buscar produtos pelo nome'); label.htmlFor = 'header-search-input';
+  const input = element('input'); input.id = 'header-search-input'; input.type = 'search';
+  input.name = 'busca'; input.placeholder = 'O que você procura?'; input.maxLength = 160;
+  input.value = (new URLSearchParams(location.search).get('busca') || '').slice(0, 160);
+  const submit = element('button', 'btn btn-dark', 'Buscar'); submit.type = 'submit';
+  const close = element('button', 'header-search-close', 'Fechar'); close.type = 'button';
+  form.append(label, icon('search'), input, submit, close); panel.append(form); header.append(panel);
+  function setOpen(open, restoreFocus = false) {
+    panel.hidden = !open; toggle.setAttribute('aria-expanded', String(open));
+    if (open) input.focus({preventScroll: true});
+    else if (restoreFocus) toggle.focus({preventScroll: true});
+  }
+  toggle.onclick = () => setOpen(panel.hidden);
+  close.onclick = () => setOpen(false, true);
+  header.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !panel.hidden) { event.preventDefault(); setOpen(false, true); }
+  });
+  document.addEventListener('click', event => { if (!header.contains(event.target)) setOpen(false); });
+  form.onsubmit = () => { input.value = input.value.trim(); };
 }
 
 export const ready = (async () => {
   const header = document.querySelector('#shop-header');
   // Estrutura fixa local; o nome configurado é atualizado com textContent.
-  header.innerHTML = '<div class="announcement"><span>Seu próximo movimento começa aqui.</span><span class="announcement-divider">|</span><span>Escolha. Combine. Supere.</span></div><div class="header-inner wrap"><a class="brand" href="/" aria-label="Página inicial"><span data-store-name>Impulso</span><span class="brand-dot">.</span></a><nav class="main-nav" aria-label="Navegação principal"><a href="/" data-nav="home">Início</a><a href="/loja?categoria=Roupas#catalogo">Roupas</a><a href="/loja?categoria=T%C3%AAnis#catalogo">Tênis</a><a href="/loja?categoria=Acess%C3%B3rios#catalogo">Acessórios</a></nav><div class="header-actions"><a class="header-icon search-link" href="/?catalogo=1#catalogo" aria-label="Buscar produtos"><span data-icon="search"></span></a><a class="header-icon favorites-link" href="/?favoritos=1#catalogo" aria-label="Meus favoritos"><span data-icon="heart"></span></a><a class="cart-link header-icon" href="/carrinho"><span data-icon="bag"></span><span id="cart-count" class="cart-count">0</span></a><a class="header-icon admin-link" href="/admin/login" aria-label="Área administrativa"><span data-icon="user"></span></a></div></div><nav class="mobile-nav" aria-label="Categorias"><a href="/loja?categoria=Roupas#catalogo">Roupas</a><a href="/loja?categoria=T%C3%AAnis#catalogo">Tênis</a><a href="/loja?categoria=Acess%C3%B3rios#catalogo">Acessórios</a></nav>';
+  header.innerHTML = '<div class="header-inner wrap"><a class="brand" href="/" aria-label="Página inicial"><span data-store-name>Impulso</span><span class="brand-dot">.</span></a><nav class="main-nav" aria-label="Navegação principal"><a href="/" data-nav="home">Início</a><a href="/loja?categoria=Roupas#catalogo">Roupas</a><a href="/loja?categoria=T%C3%AAnis#catalogo">Tênis</a><a href="/loja?categoria=Acess%C3%B3rios#catalogo">Acessórios</a></nav><div class="header-actions"><button type="button" class="header-icon search-link" aria-label="Buscar produtos" aria-expanded="false" aria-controls="header-search-panel"><span data-icon="search"></span></button><a class="header-icon favorites-link" href="/?favoritos=1#catalogo" aria-label="Meus favoritos"><span data-icon="heart"></span></a><a class="cart-link header-icon" href="/carrinho"><span data-icon="bag"></span><span id="cart-count" class="cart-count">0</span></a><a class="header-icon admin-link" href="/admin/login" aria-label="Área administrativa"><span data-icon="user"></span></a></div></div><nav class="mobile-nav" aria-label="Categorias"><a href="/loja?categoria=Roupas#catalogo">Roupas</a><a href="/loja?categoria=T%C3%AAnis#catalogo">Tênis</a><a href="/loja?categoria=Acess%C3%B3rios#catalogo">Acessórios</a></nav>';
   document.querySelector('#shop-footer').innerHTML = '<div class="wrap"><div class="footer-top"><div class="footer-about"><a class="brand" href="/"><span data-store-name>Impulso</span><span class="brand-dot">.</span></a><p class="footer-copy">Seu destino para estar em movimento.<br>Esporte, estilo e atitude em um só lugar.</p></div><nav class="footer-column" aria-label="Loja"><h2>LOJA</h2><a href="/?catalogo=1#catalogo">Todos os produtos</a><a href="/loja?categoria=T%C3%AAnis#catalogo">Tênis</a><a href="/loja?categoria=Roupas#catalogo">Roupas</a><a href="/loja?categoria=Acess%C3%B3rios#catalogo">Acessórios</a></nav><nav class="footer-column" aria-label="Suas escolhas"><h2>SUAS ESCOLHAS</h2><a href="/carrinho">Meu carrinho</a><a href="/?favoritos=1#catalogo">Meus favoritos</a><a href="/loja?categoria=Acess%C3%B3rios#catalogo">Acessórios</a></nav><div class="footer-note"><h2>SEMPRE EM MOVIMENTO</h2><p>Encontre o que acompanha o seu ritmo. O próximo passo é seu.</p><a href="/?catalogo=1#catalogo" class="footer-explore">Explore a coleção <span data-icon="bag"></span></a></div></div><div class="footer-bottom"><span>© <span id="footer-year"></span> <span data-store-name>Impulso</span>. Projeto acadêmico.</span><a href="/admin/login">Área administrativa</a><span>Feito para acompanhar você.</span></div></div>';
   document.querySelector('#footer-year').textContent = new Date().getFullYear();
   const isHome = location.pathname === '/' && !location.search;
   if (isHome) document.querySelector('[data-nav="home"]').setAttribute('aria-current', 'page');
-  document.querySelector('.search-link').onclick = event => {
-    const search = document.querySelector('#search');
-    if (search) { event.preventDefault(); window.dispatchEvent(new CustomEvent('catalogsearch')); document.querySelector('#catalogo').scrollIntoView(); search.focus({preventScroll: true}); }
-  };
+  setupHeaderSearch(header);
+  setupAssistant();
   applyBrandLogo();
   decorate();
   cart = readCart(); updateBadge();

@@ -1,4 +1,4 @@
-import {api, ready, getCart, saveCart, toast, element, icon, setProductImage, money, showState} from './shop.js?v=20261119-header3';
+import {api, ready, getCart, saveCart, toast, element, icon, setProductImage, money, showState} from './shop.js?v=20261119-footer-logo1';
 import {cartSummary, toCents} from './shop-core.mjs';
 
 const status = document.querySelector('#cart-status');
@@ -32,6 +32,7 @@ function lineItem(line) {
   const {product, quantidade, id} = line;
   const row = element('article', 'cart-item');
   const image = element('img', 'cart-item-image'); image.width = 110; image.height = 120;
+  image.sizes = '110px'; image.decoding = 'async'; image.loading = 'lazy';
   setProductImage(image, product || {nome: 'Produto removido'});
   const info = element('div', 'cart-item-info');
   info.append(element('p', 'product-category', product?.categoria || 'Esportes'));
@@ -70,7 +71,7 @@ function render() {
   const summary = cartSummary(getCart(), products);
   if (!summary.lines.length) {
     content.hidden = true;
-    showState(status, 'Seu carrinho está esperando movimento.', 'Explore a loja e escolha seus próximos favoritos.', {text: 'Explorar produtos', href: '/#catalogo'});
+    showState(status, 'Seu carrinho está esperando movimento.', 'Explore a loja e escolha seus próximos favoritos.', {text: 'Explorar produtos', href: '/loja'});
     return;
   }
   status.hidden = true; content.hidden = false;

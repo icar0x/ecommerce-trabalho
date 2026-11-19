@@ -1,3 +1,5 @@
+@font-face{font-family:Inter;src:url('/static/assets/fonts/inter-latin-variable.woff2') format('woff2');font-style:normal;font-weight:400 800;font-display:swap}
+@font-face{font-family:Manrope;src:url('/static/assets/fonts/manrope-latin-variable.woff2') format('woff2');font-style:normal;font-weight:400 800;font-display:swap}
 /* Identidade Impulso: preto, branco e verde-limão. */
 :root {
   --brand-ink: #0b0b0b;
@@ -8,7 +10,9 @@
   --brand-soft: #e4e8df;
   --brand-line: #d5dbcf;
   --brand-text: #111111;
-  --brand-muted: #62685e;
+  --brand-muted: #4e5749;
+  --font-body: Inter, 'Segoe UI', sans-serif;
+  --font-heading: Manrope, Inter, 'Segoe UI', sans-serif;
   --brand-lime: #b7ff00;
   --brand-lime-hover: #a4e600;
   --brand-lime-soft: #f1f8e2;

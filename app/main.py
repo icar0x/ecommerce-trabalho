@@ -1,4 +1,3 @@
-import re
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -21,6 +20,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.auth import SupabaseAuth
 from app.config import Settings
 from app.models import CATEGORIES, CartQuery, Login, Product, ProductInput, RecentInput
+from app.search import search_query
 
 STATIC = Path(__file__).parent / 'static'
 TTL = 7 * 24 * 60 * 60
@@ -148,9 +148,7 @@ def create_app(settings=None, products=None, redis=None, auth=None):
 
     @app.get('/api/produtos')
     def list_products(request: Request, busca: str = Query('', max_length=160), categoria: str = Query('', max_length=100), limite: int = Query(100, ge=1, le=100), pagina: int = Query(1, ge=1)):
-        query = {}
-        if busca.strip():
-            query['nome'] = {'$regex': re.escape(busca.strip()), '$options': 'i'}
+        query = search_query(busca)
         if categoria:
             query['categoria'] = categoria
         collection = request.app.state.products

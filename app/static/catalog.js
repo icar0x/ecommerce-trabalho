@@ -1,6 +1,7 @@
-import {api, ready, element, productCard, loadRecent, showState, favoriteIds} from './shop.js?v=20261119-header3';
+import {api, ready, element, productCard, loadRecent, showState, favoriteIds} from './shop.js?v=20261119-footer-logo1';
 import {initHero} from './hero.js';
 import {groupProducts} from './product-variants.mjs';
+import {fetchAllProducts} from './products-api.mjs';
 
 initHero(document.querySelector('.hero-carousel'));
 
@@ -12,8 +13,9 @@ let page = Math.max(1, Math.min(100000, Number.parseInt(params.get('pagina'), 10
 let search = (params.get('busca') || '').slice(0, 160);
 let controller;
 let requestNumber = 0;
-let favoritesOnly = params.get('favoritos') === '1' || (!isCollection && !category && !search && params.get('catalogo') !== '1');
-const searchInput = document.querySelector('#search');
+let favoritesOnly = params.get('favoritos') === '1';
+let homeShelves = !isCollection && !category && !search && !favoritesOnly && params.get('catalogo') !== '1';
+const searchInput = document.querySelector('#header-search-input');
 const grid = document.querySelector('#product-grid');
 const status = document.querySelector('#catalog-status');
 searchInput.value = search;
@@ -44,6 +46,10 @@ async function loadCategories() {
 }
 
 async function load() {
+  document.querySelector('#catalogo').hidden = homeShelves;
+  const shelves = document.querySelector('#category-carousels');
+  if (shelves) shelves.hidden = !homeShelves;
+  if (homeShelves) return;
   controller?.abort(); controller = new AbortController();
   const signal = controller.signal;
   const currentRequest = ++requestNumber;
@@ -56,7 +62,9 @@ async function load() {
   document.querySelector('#pagination').hidden = true;
   document.querySelector('#clear-filters').hidden = !search && !category;
   document.querySelector('#catalog-filters').hidden = favoritesOnly;
-  document.querySelector('#catalog-title').textContent = favoritesOnly ? 'Seus favoritos' : category || 'Escolhas para o seu próximo passo';
+  document.querySelector('#catalog-title').textContent = favoritesOnly ? 'Seus favoritos' : search ? `Resultados para “${search}”` : category || 'Todos os produtos';
+  const breadcrumb = document.querySelector('.collection-page .breadcrumbs>span:last-child');
+  if (breadcrumb) breadcrumb.textContent = search ? 'Resultados da busca' : category || 'Todos os produtos';
   updateCategoryButtons();
   try {
     let data;
@@ -66,15 +74,7 @@ async function load() {
       products = response.dados.filter(product => (!category || product.categoria === category) && product.nome.toLocaleLowerCase('pt-BR').includes(search.toLocaleLowerCase('pt-BR')));
     } else {
       // Agrupar antes de paginar impede que cores do mesmo modelo fiquem em páginas diferentes.
-      const fetchQuery = new URLSearchParams({busca: search, categoria: category, pagina: 1, limite: 100});
-      const response = await api(`/api/produtos?${fetchQuery}`, {signal});
-      products = response.dados;
-      for (let next = 2; products.length < response.total; next++) {
-        fetchQuery.set('pagina', next);
-        const more = await api(`/api/produtos?${fetchQuery}`, {signal});
-        if (!more.dados.length) break;
-        products.push(...more.dados);
-      }
+      products = await fetchAllProducts(api, {busca: search, categoria: category}, {signal});
     }
     const groups = groupProducts(products);
     data = {dados: groups.slice((page - 1) * pageSize, page * pageSize), total: groups.length, limite: pageSize};
@@ -82,8 +82,8 @@ async function load() {
     if (page > 1 && !data.dados.length && data.total > 0) { page = 1; return load(); }
     document.querySelector('#result-count').textContent = `${data.total} produto${data.total === 1 ? '' : 's'} encontrado${data.total === 1 ? '' : 's'}`;
     if (!data.dados.length) {
-      showState(status, favoritesOnly ? 'Seus próximos favoritos estão por aí.' : search || category ? 'Nenhum produto por aqui.' : 'O próximo movimento está chegando.',
-        favoritesOnly ? 'Toque no coração de um produto para guardá-lo aqui.' : search || category ? 'Tente outro nome ou explore todas as categorias.' : 'Estamos preparando nosso catálogo. Volte em breve para conferir as novidades.',
+      showState(status, favoritesOnly ? 'Seus próximos favoritos estão por aí.' : search ? `Não encontramos produtos para “${search}”.` : category ? 'Nenhum produto nesta categoria.' : 'O próximo movimento está chegando.',
+        favoritesOnly ? 'Toque no coração de um produto para guardá-lo aqui.' : search || category ? 'Use a lupa no cabeçalho para tentar outro termo ou veja todos os produtos.' : 'Estamos preparando nosso catálogo. Volte em breve para conferir as novidades.',
         search || category || favoritesOnly ? {text: 'Ver todos os produtos', run: showAll} : null);
     } else {
       status.hidden = true; grid.replaceChildren(...data.dados.map(group => productCard(group.product, group.variants)));
@@ -102,8 +102,7 @@ async function load() {
 
 function clear() { category = ''; search = ''; page = 1; searchInput.value = ''; load(); }
 function showAll() {
-  if (isCollection) { location.assign('/?catalogo=1#catalogo'); return; }
-  favoritesOnly = false; clear();
+  homeShelves = false; favoritesOnly = false; clear();
 }
 document.querySelector('#clear-filters').onclick = clear;
 document.querySelector('#view-all-products').onclick = event => { event.preventDefault(); showAll(); };
@@ -115,16 +114,57 @@ document.querySelector('#category-tabs').onclick = event => {
     location.assign(`/loja?${new URLSearchParams({categoria: button.dataset.category})}#catalogo`);
     return;
   }
-  favoritesOnly = false; category = button.dataset.category; search = searchInput.value.trim(); page = 1; load();
+  favoritesOnly = false; category = button.dataset.category; page = 1; load();
 };
-document.querySelector('#catalog-filters').onsubmit = event => { event.preventDefault(); favoritesOnly = false; search = searchInput.value.trim(); page = 1; load(); };
-window.addEventListener('catalogsearch', () => { favoritesOnly = false; page = 1; load(); });
-searchInput.addEventListener('search', () => { search = searchInput.value.trim(); page = 1; load(); });
 for (const [id, step] of [['previous-page', -1], ['next-page', 1]]) {
   document.getElementById(id).onclick = () => { page += step; load(); document.querySelector('#catalogo').scrollIntoView(); };
 }
+async function loadShelves() {
+  const host = document.querySelector('#category-carousels');
+  if (!host || !homeShelves) return;
+  host.setAttribute('aria-busy', 'true');
+  host.replaceChildren();
+  try {
+    const products = await fetchAllProducts(api);
+    for (const [index, name] of ['Roupas', 'Tênis', 'Acessórios'].entries()) {
+      const section = element('section', 'category-shelf');
+      section.setAttribute('aria-labelledby', `shelf-title-${index}`);
+      const heading = element('div', 'section-heading shelf-heading');
+      const title = element('h2', '', name); title.id = `shelf-title-${index}`;
+      const actions = element('div', 'shelf-actions');
+      const all = element('a', 'text-link', 'Ver coleção');
+      all.href = `/loja?${new URLSearchParams({categoria: name})}#catalogo`;
+      actions.append(all);
+      const track = element('div', 'product-carousel'); track.id = `shelf-track-${index}`;
+      track.setAttribute('aria-label', `Produtos de ${name}`);
+      track.tabIndex = 0;
+      const controls = [];
+      for (const [label, step, symbol] of [['Anterior', -1, '‹'], ['Próximo', 1, '›']]) {
+        const button = element('button', 'carousel-control', symbol); button.type = 'button';
+        button.setAttribute('aria-label', `${label}: ${name}`);
+        button.setAttribute('aria-controls', track.id);
+        button.onclick = () => track.scrollBy({left: step * track.clientWidth * .85, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'});
+        controls.push(button); actions.append(button);
+      }
+      const groups = groupProducts(products.filter(product => product.categoria === name));
+      track.append(...groups.map(group => productCard(group.product, group.variants)));
+      if (!groups.length) track.append(element('p', 'shelf-empty', 'Novos produtos em breve.'));
+      const updateControls = () => {
+        controls[0].disabled = track.scrollLeft <= 2;
+        controls[1].disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
+      };
+      track.addEventListener('scroll', updateControls, {passive: true});
+      new ResizeObserver(updateControls).observe(track);
+      heading.append(title, actions); section.append(heading, track); host.append(section);
+      requestAnimationFrame(updateControls);
+    }
+  } catch (error) {
+    showState(host, 'Não foi possível carregar as coleções.', error.message, {text: 'Tentar novamente', run: loadShelves});
+  } finally { host.setAttribute('aria-busy', 'false'); }
+}
+
 await ready;
-await loadCategories();
-await Promise.allSettled([load(), loadRecent()]);
+if (!homeShelves) await loadCategories();
+await Promise.allSettled([load(), loadShelves(), loadRecent()]);
 // Voltar pelo navegador pode restaurar o HTML antigo sem executar os módulos outra vez.
 window.addEventListener('pageshow', event => { if (event.persisted) { loadRecent(); if (favoritesOnly) load(); } });

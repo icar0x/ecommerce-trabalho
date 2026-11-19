@@ -15,7 +15,7 @@ python -m pip install -r requirements.txt
 Copy-Item .env.example .env
 # Edite .env antes de utilizar login e bancos.
 docker compose up -d
-python -m scripts.seed
+python -m scripts.catalog
 python -m uvicorn app.main:app --reload
 ```
 
@@ -31,6 +31,8 @@ Se a ativação do ambiente for bloqueada, use diretamente `.\.venv\Scripts\pyth
 O HTML do painel é público, mas cada escrita na API exige token validado e UUID autorizado. Nenhum dado secreto fica no HTML.
 
 ## Configuração dos serviços
+
+O painel `/admin` inclui visão geral com indicadores do catálogo, estoque por categoria, mix de produtos, alertas de estoque e metas editáveis. O valor potencial do estoque usa preço de venda × quantidade e não representa faturamento; a loja ainda não registra pedidos/vendas. Metas sugeridas de catálogo/estoque podem ser alteradas e ficam salvas por conta **neste navegador**, não são sincronizadas entre dispositivos. Cadastro, edição e exclusão continuam disponíveis na seção Produtos e atualizam os indicadores.
 
 | Variável | Preencher com |
 | --- | --- |
@@ -81,7 +83,7 @@ Todas as rotas usam o prefixo `/api`. Sucesso retorna `{"dados": ...}`; listagem
 | `GET /api/categorias` | Lista fixa: `Roupas`, `Tênis` e `Acessórios`, inclusive com catálogo vazio |
 | `POST /api/carrinho/consultar` | Corpo `{"produtoIds":["<id>"]}`; dados atuais de até 50 produtos, sem exigir login |
 
-As rotas protegidas recebem `Authorization: Bearer <access_token>`. No Swagger, use Authorize após obter o token. Busca faz correspondência parcial por nome sem diferenciar maiúsculas; caracteres de expressão regular são tratados literalmente. Categoria usa correspondência exata. A listagem ordena por criação decrescente, com desempate por ID. O painel usa páginas de 20 produtos.
+As rotas protegidas recebem `Authorization: Bearer <access_token>`. No Swagger, use Authorize após obter o token. Busca faz correspondência parcial em nome, categoria e descrição, sem diferenciar maiúsculas ou acentos: `tenis` encontra `Tênis`, `acessorios` encontra `Acessórios`. Todas as palavras devem aparecer no produto, em qualquer ordem e em qualquer um desses campos (ex.: `tenis branco`). O MongoDB usa `$regex` com opção `i` e equivalência de acentos, com comportamento semelhante a `ILIKE '%termo%'`; caracteres especiais, inclusive `%`, `_` e expressões regulares, são tratados literalmente. Categoria usa correspondência exata. A listagem ordena por criação decrescente, com desempate por ID. O painel usa páginas de 20 produtos.
 
 Exemplo de criação/edição (id e datas são gerados no backend):
 
@@ -142,7 +144,7 @@ O Redis armazena somente IDs em `recentes:<uuid>`. A transação LREM/LPUSH/LTRI
 
 ### Frontend e carrinho
 
-- `index.html` / `catalog.js`: busca por nome, categorias provenientes do banco, paginação e recentes.
+- `index.html` / `catalog.js`: carrosséis por categoria, busca, favoritos e recentes; `collection.html` compartilha a listagem paginada.
 - `product.html` / `product.js`: detalhes, disponibilidade e quantidade; registra a visita explicitamente no Redis.
 - `cart.html` / `cart.js`: quantidades, remoção, esvaziamento e resumo com preços atuais.
 - `shop.js`: componentes compartilhados, imagens de apoio, cabeçalho, rodapé e persistência.
@@ -163,6 +165,8 @@ Imagens usam a URL cadastrada no painel, com ilustração local de apoio caso n�
 
 ## Dados de demonstração
 
+A busca reconhece termos comuns do catálogo: `camisa`/`camisas` encontra camisetas e regatas; `garrafa` encontra o squeeze Hydrate; plurais comuns e termos como `sapatos`/`sneakers` também são aceitos. Os resultados mostram o termo pesquisado no título; “Ver todos os produtos” limpa a busca na própria listagem.
+
 Coleção Impulso aprovada: **17 produtos**, com 3 camisas, 9 tênis (3 modelos em 3 cores) e 5 acessórios. Preços e estoques fictícios autorizados para o trabalho acadêmico. Cada cor de tênis é um produto separado; não há seleção de tamanho ou estoque por numeração.
 
 ```powershell
@@ -171,22 +175,22 @@ python -m scripts.catalog
 
 O catálogo está em `scripts/catalog.json`. O comando valida os arquivos locais antes de inserir e usa `catalogKey` com índice único esparso para não duplicar nem sobrescrever produtos e edições do painel. Não exclui registros anteriores. Camisas: R$ 79,90–99,90; tênis: R$ 249,90–299,90; acessórios: R$ 29,90–159,90. Estoques iniciais fictícios entre 12 e 50 unidades.
 
-O seed antigo abaixo é opcional e insere quatro exemplos genéricos adicionais; não é necessário para a coleção Impulso:
+## Verificação
+
+Imagens ativas em WebP, com miniaturas responsivas para produtos. Os PNGs originais ficam preservados; URLs antigas do banco são convertidas para a versão otimizada apenas na exibição, sem migrar ou alterar os produtos. Para regenerar os WebPs após instalar as dependências de desenvolvimento:
 
 ```powershell
-python -m scripts.seed
+python -m scripts.optimize_images
 ```
 
-Insere quatro produtos com marcadores internos `demoKey` e índice único esparso. Pode executar novamente: não duplica, não apaga e não sobrescreve edições. Produtos criados manualmente não são alterados.
-
-## Verificação
+O script usa Pillow somente na preparação dos arquivos, não durante a navegação. O mapeamento está em `app/static/optimized-images.mjs`. O cadastro genérico antigo foi removido; use somente `python -m scripts.catalog` para a coleção aprovada.
 
 ```powershell
 python -m pip install -r requirements-dev.txt
 python -m pytest -q
 python -m compileall -q app scripts tests
 # Opcional para os testes de lógica do carrinho: Node.js 20+.
-node --test tests/shop-core.test.mjs
+node --test
 ```
 
 Os testes Python usam **mongomock, fakeredis e transporte HTTP simulado**, injetados somente pela fábrica de aplicação. Verificam login e rejeições, autorização das três escritas, CRUD, precisão do preço, validações, busca, histórico separado, ordenação, duplicatas, limite, renovação de TTL, produtos excluídos, páginas, categorias, consulta do carrinho e seed idempotente. Os testes Node verificam centavos, armazenamento adulterado, limites e resumo com estoque atualizado/produtos excluídos. Esses testes não comprovam conectividade com serviços reais.

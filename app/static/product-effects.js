@@ -17,7 +17,7 @@ export function enableProductEffect(card) {
     hovering = false;
     x = y = velocityX = velocityY = targetX = targetY = 0;
     card.classList.remove('is-tilting', 'is-pointer-over');
-    for (const property of ['--tilt-x', '--tilt-y', '--glow-x', '--glow-y']) card.style.removeProperty(property);
+    for (const property of ['--tilt-x', '--tilt-y']) card.style.removeProperty(property);
   }
 
   function animate(time) {
@@ -48,8 +48,6 @@ export function enableProductEffect(card) {
     const relativeY = Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height));
     targetX = (0.5 - relativeY) * 12;
     targetY = (relativeX - 0.5) * 12;
-    card.style.setProperty('--glow-x', `${(relativeX * bounds.width).toFixed(1)}px`);
-    card.style.setProperty('--glow-y', `${(relativeY * bounds.height).toFixed(1)}px`);
     start();
   }
 

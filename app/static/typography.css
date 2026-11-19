@@ -1,0 +1,71 @@
+/* Hierarquia compartilhada: títulos Manrope e leitura Inter, ambas locais. */
+html{font-family:var(--font-body);font-size:16px;text-size-adjust:100%;-webkit-text-size-adjust:100%}
+body,.admin-app{font-family:var(--font-body);font-size:1rem;line-height:1.65;font-weight:400}
+button,input,textarea,select{font-family:var(--font-body)}
+h1,h2,h3{font-family:var(--font-heading);font-weight:750;letter-spacing:-.035em;line-height:1.2}
+p{line-height:1.7}
+button,.btn,.button{font-weight:650;letter-spacing:-.01em}
+.main-nav,.mobile-nav{font-size:.9375rem;font-weight:600}
+.eyebrow{font-size:.8125rem;line-height:1.5;letter-spacing:.075em;font-weight:750}
+.hero-carousel .hero-copy .eyebrow{font-size:.8125rem;letter-spacing:.065em;line-height:1.5}
+.hero-carousel .hero-copy>p:not(.eyebrow){font-size:1.0625rem;line-height:1.75;font-weight:450;color:#30352c}
+.hero-carousel .hero-copy h2{font-weight:800;letter-spacing:-.045em;line-height:1.1}
+.hero-actions .btn,.hero-carousel .hero-actions .btn,.editorial-products .btn{font-size:.9375rem;line-height:1.5}
+.section-heading h2,.shelf-heading h2{font-size:clamp(1.4rem,2vw,1.8rem);font-weight:750;letter-spacing:-.035em;line-height:1.3}
+.compact-heading h2{font-size:clamp(1.25rem,1.8vw,1.6rem);text-transform:none;letter-spacing:-.025em;max-width:none;line-height:1.35}
+.text-link,.text-button,.compact-heading>.text-link,.shelf-actions .text-link{font-size:.9375rem;font-weight:600}
+.catalog-meta,.catalog-meta .text-button,.chip{font-size:.9375rem;line-height:1.5}
+.catalog-meta{min-height:58px}
+.product-card h3{font-family:var(--font-body);font-size:1rem;font-weight:650;line-height:1.5;letter-spacing:-.015em}
+.product-card .product-category,.variant-caption{font-size:.875rem;color:var(--brand-muted);line-height:1.5}
+.product-price{font-size:1.125rem;font-weight:750;font-variant-numeric:tabular-nums;letter-spacing:-.025em}
+.product-info{padding-top:14px}.product-bottom{margin-top:10px;gap:8px}
+.category-name{font-family:var(--font-heading);font-weight:800;letter-spacing:-.035em;line-height:1.12}
+.category-description{font-size:.9375rem;line-height:1.7;color:#d3d9ce}
+.category-kicker,.category-explore{font-size:.875rem;line-height:1.5}
+.editorial-products h2{font-weight:800;letter-spacing:-.035em;line-height:1.12}
+.editorial-products p:not(.eyebrow){font-size:1.0625rem;line-height:1.75;color:#e0e5da}
+.editorial-products .eyebrow{font-size:.8125rem}
+.footer-copy{font-size:.9375rem;line-height:1.8;color:#c6cfbf}
+.footer-column h2,.footer-note h2{font-size:.875rem;line-height:1.5;letter-spacing:.035em}
+.footer-column a,.footer-note p,.footer-explore{font-size:.9375rem;line-height:1.7}
+.footer-bottom{font-size:.8125rem;line-height:1.6}
+.breadcrumbs{font-size:.9375rem;line-height:1.6;flex-wrap:wrap}
+.description{font-size:1.0625rem;line-height:1.8;color:var(--brand-muted)}
+.stock-label,.detail-tip,.detail-cart-link,.secondary-note,.summary-footnote{font-size:.9375rem;line-height:1.7}
+.detail-info .eyebrow,.cart-main .eyebrow{font-size:.8125rem}
+.cart-item-title{font-size:1rem;line-height:1.5;font-weight:650}.cart-item-price,.cart-item-warning,.cart-list-heading,.summary-line,.checkout-soon{font-size:.9375rem;line-height:1.65}
+.cart-item-info .product-category{font-size:.875rem}.cart-item-total{font-size:1.0625rem}.summary-total strong{font-variant-numeric:tabular-nums}
+.buy-controls>.btn,.toast,.state-panel p,.notice{font-size:.9375rem;line-height:1.65}
+.state-panel h2{line-height:1.35}.assistant-body p{font-size:1rem;line-height:1.75}.assistant-heading h2{font-size:1.0625rem;line-height:1.4}.assistant-body h3{font-weight:750;line-height:1.35}
+.login h1{font-size:2.25rem;font-weight:800}.login p{font-size:1rem}.login label{font-size:.9375rem}.login input{font-size:1rem}.login button{font-size:1rem}
+/* Administração: rótulos legíveis sem depender de letras muito pequenas. */
+.admin-app .dashboard-intro{font-size:1rem;line-height:1.75}
+.admin-app .eyebrow{font-size:.8125rem;line-height:1.5;letter-spacing:.075em}
+.admin-app .dashboard-page-heading h1{font-family:var(--font-heading);font-weight:800;line-height:1.15;letter-spacing:-.04em}
+.admin-app .dashboard-card-heading h2,.admin-app .card h2{font-size:1.25rem;line-height:1.35;font-weight:750}
+.admin-app .metric-label{font-size:.875rem;line-height:1.5;font-weight:550}
+.admin-app .metric-card>strong{font-family:var(--font-heading);font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.admin-app .metric-card p{font-size:.8125rem;line-height:1.65}
+.admin-app .dashboard-text,.admin-app .dashboard-update,.admin-app .chart-unit{font-size:.875rem;line-height:1.5}
+.admin-app .chart-footnote,.admin-app .dashboard-data-note{font-size:.875rem;line-height:1.75}
+.admin-app .stock-bar-label,.admin-app .legend-row,.admin-app .goal-label{font-size:.9375rem;line-height:1.5}
+.admin-app .legend-row strong,.admin-app .goal-label strong{font-size:.875rem}
+.admin-app .legend-row small,.admin-app .goal-detail{font-size:.8125rem;line-height:1.6}
+.admin-app .legend-row{row-gap:10px}.admin-app .attention-row strong{font-size:.9375rem;line-height:1.5}
+.admin-app .attention-row small,.admin-app .attention-count{font-size:.8125rem;line-height:1.6}
+.admin-app .attention-row{gap:16px;padding-block:14px}
+.admin-app label,.admin-app .small,.admin-app .admin-stock-badge{font-size:.875rem;line-height:1.5}
+.admin-app input,.admin-app textarea,.admin-app select{font-size:1rem;line-height:1.5}
+.admin-app button,.admin-app .filters button{font-size:.9375rem}
+.admin-app table{font-size:.9375rem;line-height:1.6}
+.admin-app th{font-size:.8125rem;letter-spacing:.04em}
+.admin-app .admin-product-category,.admin-app #count,.admin-app #page{font-size:.875rem}
+.admin-app .dashboard-nav a{font-size:.9375rem;line-height:1.5}
+.admin-app .sidebar-caption{font-size:.75rem;letter-spacing:.09em;color:#b5c0ab}
+.admin-app .sidebar-bottom p{font-size:.875rem;color:#b9c4af}
+.admin-app .dashboard-topbar{font-size:.875rem}.admin-app .dashboard-topbar small{font-size:.8125rem}
+.admin-app #goals-dialog p{font-size:.9375rem;line-height:1.7}
+@media(max-width:800px){.main-nav,.mobile-nav{font-size:.9375rem}.section-heading,.compact-heading{gap:14px;flex-wrap:wrap}.shelf-heading{flex-wrap:nowrap}.hero-carousel .hero-copy .eyebrow{font-size:.75rem}.hero-carousel .hero-copy>p:not(.eyebrow){font-size:1rem}.hero-carousel .hero-actions .btn{font-size:.875rem}.product-card h3{font-size:1rem}.shelf-actions .text-link{font-size:.875rem}.category-description{font-size:.875rem}.recent-section .section-heading>p{font-size:.9375rem;max-width:none;text-align:left}.footer-copy,.footer-column a{font-size:.9375rem}}
+@media(max-width:760px){.admin-app .dashboard-nav a{font-size:.875rem;gap:0;text-align:center;white-space:normal}.admin-app .dashboard-nav a>span{display:none}.admin-app .dashboard-card-heading{flex-wrap:wrap;row-gap:8px}.admin-app .metric-card>strong{font-size:1.875rem}.admin-app .metric-highlight>strong{font-size:1.375rem}.admin-app .catalog td{font-size:.9375rem}.admin-app .catalog td[data-label]:before{font-size:.8125rem}.admin-app .mix-content{gap:18px}.admin-app .donut-wrap{width:130px;height:130px;flex-basis:130px}.admin-app .legend-row{font-size:.875rem}}
+@media(max-width:380px){.admin-app .metrics-grid{grid-template-columns:1fr}.admin-app .metric-card{padding:20px}.admin-app .metric-card>strong,.admin-app .metric-highlight>strong{font-size:2rem}.admin-app .mix-content{flex-wrap:wrap;justify-content:center}.admin-app .mix-legend{width:100%;flex-basis:100%}.shelf-actions{gap:5px}.shelf-actions .text-link{margin-right:0;font-size:.875rem}.shelf-heading h2{font-size:1.375rem}.buy-controls{flex-wrap:wrap}.buy-controls>.btn{flex-basis:100%}.category-name{font-size:1.8rem}}

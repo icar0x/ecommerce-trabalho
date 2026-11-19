@@ -12,7 +12,6 @@ from redis.exceptions import ConnectionError as RedisConnectionError
 from app.auth import SupabaseAuth
 from app.config import Settings
 from app.main import TTL, create_app
-from scripts.seed import seed
 from scripts.catalog import seed_catalog
 
 ADMIN = str(uuid4())
@@ -94,6 +93,45 @@ def test_auth(setup):
     assert calls[-1].url.path.endswith('/logout')
 
 
+def test_search_ignores_case_accents_and_matches_fields(setup):
+    client, _, _, _ = setup
+    shoes = create(client, nome='Tênis Impulso District', categoria='Tênis', descricao='Branco com detalhes verde-limão')
+    shirt = create(client, nome='Camiseta Essential', descricao='Algodão para treino')
+    bag = create(client, nome='Bolsa Move', categoria='Acessórios', descricao='Organização no dia a dia')
+    for term in ['tenis', 'TÊNIS', 'TeNi', '  tenis  ', 'te\u0302nis', 'distr', 'TENIS branco', 'branco DISTRICT', 'limao']:
+        response = client.get('/api/produtos', params={'busca': term})
+        assert response.status_code == 200
+        assert [p['id'] for p in response.json()['dados']] == [shoes['id']], term
+    for term, expected in [('roupas', shirt), ('ALGODAO', shirt), ('acessorios', bag), ('organizacao', bag)]:
+        assert client.get('/api/produtos', params={'busca': term}).json()['dados'][0]['id'] == expected['id']
+    assert client.get('/api/produtos', params={'busca': 'tenis', 'categoria': 'Roupas'}).json()['total'] == 0
+    for term in ['.*', '[', '%', '_', 'tenis inexistente']:
+        assert client.get('/api/produtos', params={'busca': term}).json()['total'] == 0
+    # Caracteres especiais continuam literais, sem curingas injetados pelo usuário.
+    special = create(client, nome='Modelo [A]_100%')
+    for term in ['[A]', '_100%']:
+        assert client.get('/api/produtos', params={'busca': term}).json()['dados'][0]['id'] == special['id']
+    create(client, nome='Te\u0302nis teste', categoria='Tênis')
+    assert client.get('/api/produtos', params={'busca': 'tenis'}).json()['total'] == 2
+    assert client.get('/api/produtos', params={'busca': '   '}).json()['total'] == 5
+
+
+def test_search_customer_terms_and_synonyms(setup):
+    client, _, _, _ = setup
+    shirt = create(client, nome='Camiseta Essential')
+    tank = create(client, nome='Regata Pulse')
+    shoe = create(client, nome='Tênis District', categoria='Tênis')
+    bottle = create(client, nome='Squeeze Hydrate', categoria='Acessórios')
+    for term in ['camisa', 'camisas', 'CAMISAS']:
+        ids = {p['id'] for p in client.get('/api/produtos', params={'busca': term}).json()['dados']}
+        assert ids == {shirt['id'], tank['id']}
+    for term, expected in [('camisetas', shirt), ('regatas', tank), ('sapatos', shoe), ('sneakers', shoe), ('garrafa', bottle)]:
+        data = client.get('/api/produtos', params={'busca': term}).json()
+        assert [p['id'] for p in data['dados']] == [expected['id']]
+    assert client.get('/api/produtos', params={'busca': 'camisa essential'}).json()['total'] == 1
+    assert client.get('/api/produtos', params={'busca': 'camisa', 'categoria': 'Tênis'}).json()['total'] == 0
+
+
 def test_crud_and_search(setup):
     client, collection, _, _ = setup
     product = create(client)
@@ -156,17 +194,14 @@ def test_recent_history(setup):
     assert cache.lrange(key, 0, -1) == []
 
 
-def test_seed_preserves_edits(setup):
-    client, collection, _, _ = setup
-    assert seed(collection) == 4
-    collection.update_one({'demoKey': 'shorts'}, {'$set': {'nome': 'Nome editado'}})
-    assert seed(collection) == 0
-    assert collection.count_documents({}) == 4
-    assert collection.find_one({'demoKey': 'shorts'})['nome'] == 'Nome editado'
+def test_catalog_pagination(setup):
+    client = setup[0]
+    for index in range(4):
+        create(client, nome=f'Produto {index}')
     response = client.get('/api/produtos?limite=2&pagina=2').json()
     assert response['total'] == 4
     assert len(response['dados']) == 2
-    assert 'demoKey' not in response['dados'][0]
+    assert 'catalogKey' not in response['dados'][0]
 
 
 def test_pages_and_no_password_echo(setup):

@@ -1,3 +1,5 @@
+import {initDashboard, refreshDashboard} from './admin-dashboard.js?v=20261119-footer-logo1';
+
 const token = sessionStorage.getItem('admin_token');
 if (!token) location.replace('/admin/login');
 const form = document.querySelector('#product-form');
@@ -49,6 +51,20 @@ function reset() {
   document.querySelector('#form-title').textContent = 'Novo produto';
 }
 
+function editProduct(product) {
+  editing = product.id;
+  for (const field of fields) form.elements[field].value = product[field] ?? '';
+  priceInput.value = formatPrice(product.preco);
+  priceInput.setCustomValidity('');
+  document.querySelector('#form-title').textContent = 'Editar produto';
+  document.querySelector('#gestao-produtos').scrollIntoView();
+  form.nome.focus({preventScroll: true});
+}
+
+document.querySelector('#new-product').onclick = () => {
+  reset(); document.querySelector('#gestao-produtos').scrollIntoView(); form.nome.focus({preventScroll: true});
+};
+
 async function load() {
   const params = new URLSearchParams({busca: document.querySelector('#busca').value,
     categoria: document.querySelector('#filter-category').value, pagina: page, limite: 20});
@@ -66,17 +82,16 @@ async function load() {
       cell.textContent = text;
       row.append(cell);
     }
+    const category = document.createElement('span'); category.className = 'admin-product-category'; category.textContent = product.categoria;
+    row.firstElementChild.append(category);
+    const stockCell = row.children[2]; stockCell.replaceChildren();
+    row.children[1].dataset.label = 'Preço'; stockCell.dataset.label = 'Estoque';
+    const badge = document.createElement('span'); badge.className = 'admin-stock-badge'; badge.textContent = product.estoque;
+    stockCell.append(badge);
     const actions = document.createElement('td');
     const edit = document.createElement('button');
     edit.textContent = 'Editar'; edit.className = 'secondary small';
-    edit.onclick = () => {
-      editing = product.id;
-      for (const field of fields) form.elements[field].value = product[field] ?? '';
-      priceInput.value = formatPrice(product.preco);
-      priceInput.setCustomValidity('');
-      document.querySelector('#form-title').textContent = 'Editar produto';
-      form.nome.focus();
-    };
+    edit.onclick = () => editProduct(product);
     const remove = document.createElement('button');
     remove.textContent = 'Excluir'; remove.className = 'danger small';
     remove.onclick = async () => {
@@ -86,7 +101,7 @@ async function load() {
         await api(`/api/produtos/${product.id}`, {method: 'DELETE'});
         if (editing === product.id) reset();
         message.textContent = 'Produto excluído.';
-        await load();
+        await Promise.all([load(), refreshDashboard()]);
       } catch (error) { message.textContent = error.message; remove.disabled = false; }
     };
     actions.append(edit, remove); row.append(actions); tbody.append(row);
@@ -102,7 +117,7 @@ form.onsubmit = async (event) => {
   body.imagemUrl = body.imagemUrl || null;
   try {
     await api(editing ? `/api/produtos/${editing}` : '/api/produtos', {method: editing ? 'PUT' : 'POST', body: JSON.stringify(body)});
-    reset(); message.textContent = 'Produto salvo com sucesso.'; await load();
+    reset(); message.textContent = 'Produto salvo com sucesso.'; await Promise.all([load(), refreshDashboard()]);
   } catch (error) { message.textContent = error.message; }
   finally { button.disabled = false; }
 };
@@ -116,4 +131,7 @@ document.querySelector('#logout').onclick = async () => {
   catch (error) { message.textContent = error.message; }
   finally { sessionStorage.removeItem('admin_token'); location.replace('/admin/login'); }
 };
-if (token) api('/api/auth/me').then(load).catch(e => { message.textContent = e.message; });
+if (token) api('/api/auth/me').then(({dados}) => {
+  initDashboard(api, dados.id, editProduct);
+  return Promise.all([load(), refreshDashboard()]);
+}).catch(e => { message.textContent = e.message; });

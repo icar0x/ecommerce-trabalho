@@ -1,5 +1,6 @@
-import {api, ready, getCart, addToCart, toast, money, toCents, setProductImage, loadRecent, showState, element} from './shop.js?v=20261119-header3';
+import {api, ready, getCart, addToCart, toast, money, toCents, setProductImage, loadRecent, showState, element} from './shop.js?v=20261119-footer-logo1';
 import {variantInfo} from './product-variants.mjs';
+import {fetchAllProducts} from './products-api.mjs';
 
 const id = location.pathname.split('/').filter(Boolean).at(-1);
 const quantity = document.querySelector('#quantity');
@@ -16,15 +17,7 @@ async function loadVariants() {
   choices.setAttribute('role', 'group');
   choices.setAttribute('aria-label', `Cores do Tênis Impulso ${info.family}`);
   try {
-    const query = new URLSearchParams({categoria: 'Tênis', busca: `Tênis Impulso ${info.family}`, limite: 100, pagina: 1});
-    const response = await api(`/api/produtos?${query}`);
-    const products = response.dados;
-    for (let next = 2; products.length < response.total; next++) {
-      query.set('pagina', next);
-      const more = await api(`/api/produtos?${query}`);
-      if (!more.dados.length) break;
-      products.push(...more.dados);
-    }
+    const products = await fetchAllProducts(api, {categoria: 'Tênis', busca: `Tênis Impulso ${info.family}`});
     const variants = products.filter(candidate => variantInfo(candidate)?.family === info.family);
     if (variants.length < 2) return;
     for (const variant of variants) {
@@ -93,8 +86,7 @@ async function load() {
   } catch (error) {
     showState(status, error.status === 404 ? 'Este produto não está mais disponível.' : 'Não foi possível abrir este produto.',
       error.status === 404 ? 'Explore o catálogo e encontre seu próximo favorito.' : error.message,
-      error.status === 404 ? {text: 'Explorar produtos', href: '/#catalogo'} : {text: 'Tentar novamente', run: load});
+      error.status === 404 ? {text: 'Explorar produtos', href: '/loja'} : {text: 'Tentar novamente', run: load});
   }
 }
-await ready;
 await load();
