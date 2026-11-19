@@ -1,4 +1,4 @@
-import {api, element, productCard, loadRecent, showState, favoriteIds} from './shop.js?v=20261119-responsive1';
+import {api, element, productCard, loadRecent, showState, favoriteIds} from './shop.js?v=20261119-header-actions1';
 import {initHero} from './hero.js';
 import {groupProducts} from './product-variants.mjs';
 import {fetchAllProducts} from './products-api.mjs';

@@ -1,4 +1,4 @@
-import {api, getCart, saveCart, toast, element, icon, setProductImage, money, showState} from './shop.js?v=20261119-responsive1';
+import {api, getCart, saveCart, toast, element, icon, setProductImage, money, showState} from './shop.js?v=20261119-header-actions1';
 import {cartSummary, toCents} from './shop-core.mjs';
 
 const status = document.querySelector('#cart-status');

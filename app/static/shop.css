@@ -169,6 +169,10 @@ input::placeholder,textarea::placeholder{color:var(--brand-muted);opacity:1}
 
 /* Mesmo conteúdo em todas as telas, com espaço para toque e textos longos. */
 .product-card,.catalog-filters,.category-tabs{min-width:0}
+#shop-header .header-actions{gap:8px;flex-shrink:0}
+#shop-header .header-icon{width:44px;min-height:44px;flex-shrink:0;border-radius:50%}
+#shop-header .header-icon:hover{background:var(--brand-soft)}
+#shop-header .cart-count{top:0;right:0;min-width:18px;height:18px;font-size:.6875rem}
 #catalogo,.category-shelf{scroll-margin-top:24px}
 @media(max-width:800px){.mobile-nav a{min-height:44px;display:inline-flex;align-items:center}.shelf-heading{flex-wrap:wrap}.footer-note{grid-column:1/-1}}
 @media(max-width:560px){.favorite-button,.add-button{width:44px;height:44px}.product-bottom{flex-wrap:wrap}.shelf-actions{flex-wrap:wrap}.carousel-control{width:44px;height:44px}.category-tabs{flex-wrap:wrap;overflow:visible}.chip{min-height:44px}.pagination{flex-wrap:wrap;gap:12px}.footer-note{grid-column:1/-1}}

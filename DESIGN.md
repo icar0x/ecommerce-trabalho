@@ -1,5 +1,7 @@
 # Interface da loja
 
+Ações do cabeçalho (19/11): Busca → Acesso administrativo → Favoritos → Carrinho, mesma sequência visual e de teclado no desktop/mobile. Carrinho na extremidade direita, contador alinhado dentro da área do botão. Todos os ícones têm área de 44×44 px e espaçamento de 8 px. Navegação de categorias não inclui mais o link Loja. Ícone de usuário preserva o acesso administrativo existente.
+
 Responsividade atual (19/11): todas as larguras mantêm as coleções, produtos, recentes e conteúdo do rodapé. Desktop e celular têm links Início/Loja/Roupas/Tênis/Acessórios; navegação quebra linhas nas telas menores. Carrosséis mobile mostram dois cartões por vez, com rolagem por toque e botões de 44 px; listagem mantém duas colunas no celular. Filtros quebram linhas para ficarem acessíveis. Títulos e ações podem ocupar linhas separadas. Atualização substitui o cartão de 76% da largura e a ocultação de parte dos recentes/rodapé no mobile. Identidade visual e composição geral preservadas.
 
 Logo no rodapé: variante `impulso-logo-footer.webp` com letras claras e detalhes verde-limão para o fundo preto, mantendo escudo preto e raio branco. Cabeçalho preserva a logo preta/verde original. Variante derivada com Imagegen, transparência e formato WebP, sem filtro monocromático.

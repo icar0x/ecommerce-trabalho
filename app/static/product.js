@@ -1,4 +1,4 @@
-import {api, ready, getCart, addToCart, toast, money, toCents, setProductImage, loadRecent, showState, element} from './shop.js?v=20261119-responsive1';
+import {api, ready, getCart, addToCart, toast, money, toCents, setProductImage, loadRecent, showState, element} from './shop.js?v=20261119-header-actions1';
 import {variantInfo} from './product-variants.mjs';
 import {fetchAllProducts} from './products-api.mjs';
 
